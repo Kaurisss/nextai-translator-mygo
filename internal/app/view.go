@@ -6,16 +6,25 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 	"github.com/egoist/mygo/ui/markdown"
-	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 )
 
 func (a *App) View(c *ui.Context) {
 	a.applyTheme(c)
 	t := c.Theme()
-	ui.Column(c).Fill().Background(t.Background).Children(func() {
+	root := ui.Column(c).Fill().Background(t.Background)
+	if !a.busy && !a.systemBusy {
+		if files := root.DroppedFiles(); len(files) > 0 {
+			a.dropImage(files)
+		}
+		if root.FileDragOver() {
+			root.DrawOver(func(p *ui.Painter, r ui.Rect) { p.Stroke(r, t.Accent, 0, 2) })
+		}
+	}
+	root.Children(func() {
 		bar := c.TitleBar()
 		ui.Row(c).Height(max(bar.Height, t.Space(8))).Padding(0, bar.Right+t.Space(3), 0, bar.Left+t.Space(3)).Gap(t.Space(2)).AlignItems(ui.Center).DragWindow().Children(func() {
 			ui.Image(c, a.logo).Size(t.Space(4), t.Space(4)).Radius(t.Space(1))
@@ -24,9 +33,12 @@ func (a *App) View(c *ui.Context) {
 		})
 		c.Key(a.page)
 		ui.Column(c).Grow(1).WidthPercent(100).Children(func() {
-			if a.page == "translator" {
+			switch a.page {
+			case "translator":
 				a.translator(c)
-			} else {
+			case "settings":
+				a.settings(c)
+			default:
 				ui.Column(c).Fill().Padding(t.Space(4)).Gap(t.Space(3)).Children(func() {
 					switch a.page {
 					case "history":
@@ -35,8 +47,6 @@ func (a *App) View(c *ui.Context) {
 						a.vocabulary(c)
 					case "actions":
 						a.actions(c)
-					case "settings":
-						a.settings(c)
 					}
 				})
 			}
@@ -66,6 +76,7 @@ func (a *App) View(c *ui.Context) {
 	}
 	if shortcutsEnabled && c.Shortcut(ui.Cmd, ui.KeyComma) {
 		a.page = "settings"
+		a.maybeRefreshModels()
 	}
 	if shortcutsEnabled && c.Shortcut(ui.Cmd|ui.Shift, ui.KeyEnter) && a.result != "" && a.previousWindow != 0 {
 		a.insert()
@@ -196,9 +207,9 @@ func (a *App) translator(c *ui.Context) {
 					if a.resultFormat == "纯文本" {
 						ui.TextArea(c, &a.result).ReadOnly(true).Label(a.tr("纯文本结果")).WidthPercent(100).Lines(12, 32)
 					} else if a.busy {
-						markdown.Stream(c, a.result, &a.md)
+						markdown.Stream(c, markdownHardBreaks(a.result), &a.md)
 					} else {
-						markdown.View(c, a.result, &a.md)
+						markdown.View(c, markdownHardBreaks(a.result), &a.md)
 					}
 				})
 				if a.result != "" {
@@ -322,6 +333,7 @@ func (a *App) footer(c *ui.Context) {
 				a.page = "translator"
 			} else {
 				a.page = "settings"
+				a.maybeRefreshModels()
 			}
 		}
 		ui.Text(c, profile.Provider+"  "+profile.Model).FontSize(12).TextColor(t.TextMuted).SingleLine().Grow(1)
@@ -352,7 +364,7 @@ func (a *App) history(c *ui.Context) {
 		ui.Text(c, a.tr("历史记录")).FontSize(t.Rem(1.4)).Bold()
 		ui.Spacer(c)
 		ui.Toggle(c, &a.favoritesOnly, a.tr("仅收藏"))
-		if ui.Button(c, a.tr("导出记录")).Clicked() {
+		if iconTextButton(c, "export", a.tr("导出记录"), "", false).Clicked() {
 			a.export("history")
 		}
 	}).Label(a.tr("历史记录工具"))
@@ -376,13 +388,13 @@ func (a *App) history(c *ui.Context) {
 				ui.Toolbar(c, func() {
 					ui.Text(c, r.CreatedAt.Format("2006-01-02 15:04")+"  "+r.Action).TextColor(t.TextMuted)
 					ui.Spacer(c)
-					if ui.Button(c, a.tr("打开")).Clicked() {
+					if iconTextButton(c, "open", a.tr("打开"), "", false).Clicked() {
 						a.restore(r)
 					}
 					if ui.Toggle(c, &a.Data.History[i].Favorite, a.tr("收藏")).Changed() {
 						a.save()
 					}
-					if ui.Button(c, a.tr("删除")).Clicked() {
+					if iconTextButton(c, "delete", a.tr("删除"), "", false).Clicked() {
 						remove = i
 					}
 				}).Label(a.tr("记录操作"))
@@ -406,7 +418,7 @@ func (a *App) vocabulary(c *ui.Context) {
 		}
 		ui.Text(c, a.tr("生词本")).FontSize(t.Rem(1.4)).Bold()
 		ui.Spacer(c)
-		if ui.Button(c, a.tr("生成助记故事")).Disabled(len(a.Data.Vocabulary) == 0 || a.busy).Clicked() {
+		if iconTextButton(c, "story", a.tr("生成助记故事"), "", false).Disabled(len(a.Data.Vocabulary) == 0 || a.busy).Clicked() {
 			var words []string
 			for _, w := range a.Data.Vocabulary {
 				words = append(words, w.Text)
@@ -420,7 +432,7 @@ func (a *App) vocabulary(c *ui.Context) {
 			a.page = "translator"
 			a.start()
 		}
-		if ui.Button(c, a.tr("导出生词")).Clicked() {
+		if iconTextButton(c, "export", a.tr("导出生词"), "", false).Clicked() {
 			a.export("vocabulary")
 		}
 	}).Label(a.tr("生词本工具"))
@@ -444,19 +456,19 @@ func (a *App) vocabulary(c *ui.Context) {
 				ui.Toolbar(c, func() {
 					ui.Text(c, fmt.Sprintf(a.tr("已复习 %d 次"), w.Reviews)).TextColor(t.TextMuted)
 					ui.Spacer(c)
-					if ui.Button(c, a.tr("查看")).Clicked() {
+					if iconTextButton(c, "eye", a.tr("查看"), "", false).Clicked() {
 						a.stop()
 						a.text = w.Text
 						a.result = w.Description
 						a.page = "translator"
 					}
-					if ui.Button(c, a.tr("已复习")).Clicked() {
+					if iconTextButton(c, "check", a.tr("已复习"), "", false).Clicked() {
 						a.Data.Vocabulary[i].Reviews++
 						if a.save() {
 							c.Toast(a.tr("已记录复习"))
 						}
 					}
-					if ui.Button(c, a.tr("删除")).Clicked() {
+					if iconTextButton(c, "delete", a.tr("删除"), "", false).Clicked() {
 						remove = i
 					}
 				}).Label(a.tr("生词操作"))
@@ -498,6 +510,56 @@ func preview(s string, max int) string {
 		return string(r[:max]) + "…"
 	}
 	return string(r)
+}
+
+func markdownHardBreaks(s string) string {
+	if !strings.Contains(s, "\n") {
+		return s
+	}
+	s = strings.ReplaceAll(s, "\r\n", "\n")
+	var out strings.Builder
+	out.Grow(len(s) + 32)
+	var fence byte
+	var fenceLen int
+	for len(s) > 0 {
+		line, rest, hasNL := strings.Cut(s, "\n")
+		trimmed := strings.TrimLeft(line, " ")
+		indent := len(line) - len(trimmed)
+		if fence == 0 {
+			if indent <= 3 && len(trimmed) >= 3 && (trimmed[0] == '`' || trimmed[0] == '~') {
+				n := 0
+				for n < len(trimmed) && trimmed[n] == trimmed[0] {
+					n++
+				}
+				if n >= 3 && (trimmed[0] == '~' || !strings.ContainsRune(trimmed[n:], '`')) {
+					fence, fenceLen = trimmed[0], n
+				}
+			}
+			out.WriteString(line)
+			if hasNL {
+				if fence == 0 && strings.TrimSpace(line) != "" && !strings.HasPrefix(trimmed, "|") && !strings.HasSuffix(line, "  ") && !strings.HasSuffix(line, `\`) {
+					out.WriteString("  ")
+				}
+				out.WriteByte('\n')
+			}
+		} else {
+			out.WriteString(line)
+			if hasNL {
+				out.WriteByte('\n')
+			}
+			if indent <= 3 && len(trimmed) >= fenceLen {
+				n := 0
+				for n < len(trimmed) && trimmed[n] == fence {
+					n++
+				}
+				if n >= fenceLen && strings.TrimSpace(trimmed[n:]) == "" {
+					fence, fenceLen = 0, 0
+				}
+			}
+		}
+		s = rest
+	}
+	return out.String()
 }
 
 func (a *App) actions(c *ui.Context) {
@@ -554,13 +616,13 @@ func (a *App) actions(c *ui.Context) {
 				})
 			})
 			ui.Toolbar(c, func() {
-				if ui.Button(c, a.tr("新建动作")).Clicked() {
+				if iconTextButton(c, "add", a.tr("新建动作"), "", false).Clicked() {
 					a.editAction = core.Action{ID: fmt.Sprint(time.Now().UnixNano()), Name: "新动作"}
 				}
-				if ui.PrimaryButton(c, a.tr("保存动作")).Clicked() {
+				if iconTextButton(c, "save", a.tr("保存动作"), "", true).Clicked() {
 					a.saveAction(c)
 				}
-				if ui.Button(c, a.tr("删除动作")).Disabled(len(a.Data.Actions) <= 1).Clicked() {
+				if iconTextButton(c, "delete", a.tr("删除动作"), "", false).Disabled(len(a.Data.Actions) <= 1).Clicked() {
 					a.deleteAction(c)
 				}
 			}).Label(a.tr("动作操作"))

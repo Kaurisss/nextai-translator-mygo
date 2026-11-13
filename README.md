@@ -44,7 +44,7 @@ go tool mygo build -platform windows/amd64 -skip-installer
 - 与原项目一致的单列布局，SVG 操作按钮，底部设置和历史入口；生词本、动作管理等功能通过工具栏和更多菜单访问。
 - 系统托盘、单实例、关闭窗口隐藏到托盘、菜单退出。
 - 可配置的全局取词快捷键，默认 `Ctrl+Shift+T`，macOS 为 `Cmd+Shift+T`。
-- 图片识别、区域截图后识别并翻译、系统语音朗读及停止。
+- 导入或拖放图片识别、区域截图后识别并翻译、系统语音朗读及停止。
 - Windows 下将结果写回全局取词时记住的窗口。
 
 ## 设置
@@ -87,11 +87,11 @@ go tool mygo build -platform windows/amd64 -skip-installer
 
 | 平台 | OCR | 区域截图 | 朗读 | 全局取词与写回 |
 | --- | --- | --- | --- | --- |
-| Windows | Windows.Media.Ocr，使用已安装的 OCR 语言包 | 系统截图工具 | System.Speech | Win32 复制、记住目标窗口、激活后粘贴 |
+| Windows | Windows.Media.Ocr，多语言结果择优并清理中日文多余空格 | 应用内原生框选 | System.Speech | Win32 复制、记住目标窗口、激活后粘贴 |
 | macOS | 需要 `tesseract` 与 `eng`、`chi_sim` 语言数据 | `screencapture -i` | `say` | AppleScript 复制；写回使用手动粘贴 |
 | Linux | 需要 `tesseract` 与语言数据 | 需要 `gnome-screenshot` | 需要 `espeak` | 需要 X11 `xdotool`；写回使用手动粘贴 |
 
-Windows 的 PowerShell 脚本随二进制嵌入。文本通过标准输入传给语音进程，图片路径通过环境变量传递，不拼接进脚本。截图取消会在超时后回到主窗口并显示提示。
+Windows 截图通过 Win32 读取鼠标所在屏幕，在 MyGo 原生窗口中框选并按实际像素裁剪。按 Esc、右键或关闭窗口会取消截图并恢复主窗口。OCR 脚本随二进制嵌入，优先运行用户语言引擎，再运行其他已安装的 OCR 语言包；其他结果的非空白字符数超过首选结果 20% 时择优替换，并清理中日文字符之间的空格。图片路径通过环境变量传递，文本通过标准输入传给语音进程。
 
 ## 与现有版本的差异
 

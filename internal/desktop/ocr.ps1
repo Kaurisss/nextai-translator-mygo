@@ -15,9 +15,26 @@ try {
     $decoder = Await ([Windows.Graphics.Imaging.BitmapDecoder]::CreateAsync($stream)) ([Windows.Graphics.Imaging.BitmapDecoder])
     $bitmap = Await ($decoder.GetSoftwareBitmapAsync()) ([Windows.Graphics.Imaging.SoftwareBitmap])
     try {
-        $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages()
-        if ($null -eq $engine) { throw 'Install an OCR language pack in Windows Settings.' }
-        $result = Await ($engine.RecognizeAsync($bitmap)) ([Windows.Media.Ocr.OcrResult])
-        [Console]::Write(($result.Lines | ForEach-Object { $_.Text }) -join "`n")
+        $engines = [Collections.Generic.List[object]]::new()
+        $profile = [Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages()
+        if ($null -ne $profile) { $engines.Add($profile) }
+        foreach ($language in [Windows.Media.Ocr.OcrEngine]::AvailableRecognizerLanguages) {
+            if ($null -ne $profile -and $language.LanguageTag -eq $profile.RecognizerLanguage.LanguageTag) { continue }
+            $engine = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage($language)
+            if ($null -ne $engine) { $engines.Add($engine) }
+        }
+        if ($engines.Count -eq 0) { throw 'Install an OCR language pack in Windows Settings.' }
+        $results = [Collections.Generic.List[string]]::new()
+        $failures = [Collections.Generic.List[string]]::new()
+        foreach ($engine in $engines) {
+            try {
+                $result = Await ($engine.RecognizeAsync($bitmap)) ([Windows.Media.Ocr.OcrResult])
+                $results.Add(($result.Lines | ForEach-Object { $_.Text.Trim() }) -join "`n")
+            } catch {
+                $failures.Add($_.Exception.Message)
+            }
+        }
+        if ($results.Count -eq 0) { throw ($failures -join "`n") }
+        ConvertTo-Json -InputObject @($results.ToArray()) -Compress
     } finally { $bitmap.Dispose() }
 } finally { $stream.Dispose() }

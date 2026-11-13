@@ -5,11 +5,12 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
-	"github.com/egoist/mygo/ui"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
+	"github.com/egoist/mygo/ui"
 )
 
 func testApp(t *testing.T) *App {
@@ -536,6 +537,74 @@ func TestActionOverridesGlobalModel(t *testing.T) {
 	}
 }
 
+func TestDropImageStartsOCRAndRejectsNonImages(t *testing.T) {
+	a := testApp(t)
+	queue := make(chan func(), 8)
+	a.post = func(fn func()) { queue <- fn }
+	tt := ui.NewTester(a.View, 560, 880)
+
+	txtPath := filepath.Join(t.TempDir(), "notes.txt")
+	if err := os.WriteFile(txtPath, []byte("hello"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if !tt.DropFiles(200, 200, txtPath) {
+		t.Fatal("window did not accept drop")
+	}
+	if a.systemBusy || a.failure == "" {
+		t.Fatalf("unexpected state for non-image drop: busy=%v failure=%q", a.systemBusy, a.failure)
+	}
+
+	imgPath := filepath.Join(t.TempDir(), "hello.png")
+	rendered := ui.NewTester(func(c *ui.Context) {
+		ui.Box(c).Fill().Background(ui.RGB(255, 255, 255)).Padding(24).Children(func() {
+			ui.Text(c, "Hello OCR").FontSize(32).TextColor(ui.RGB(0, 0, 0))
+		})
+	}, 320, 120)
+	f, err := os.Create(imgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := png.Encode(f, rendered.Image()); err != nil {
+		f.Close()
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	queries := make(chan core.Query, 1)
+	a.Engine = captureEngine{queries: queries}
+	if !tt.DropFiles(200, 200, imgPath) {
+		t.Fatal("window did not accept image drop")
+	}
+	if !a.systemBusy || a.failure != "" {
+		t.Fatalf("image drop did not start OCR: busy=%v failure=%q", a.systemBusy, a.failure)
+	}
+	if tt.DropFiles(200, 200, imgPath) {
+		t.Fatal("accepted another drop while OCR was busy")
+	}
+	select {
+	case fn := <-queue:
+		fn()
+	case <-time.After(15 * time.Second):
+		t.Fatal("OCR worker did not finish")
+	}
+	if a.systemBusy {
+		t.Fatal("systemBusy remained set after OCR")
+	}
+	if runtime.GOOS != "windows" {
+		return
+	}
+	select {
+	case q := <-queries:
+		if q.Text == "" {
+			t.Fatal("dropped image OCR produced empty query")
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatalf("translation did not start after drop OCR (text=%q failure=%q)", a.text, a.failure)
+	}
+}
+
 func TestRenderArtifact(t *testing.T) {
 	dir := os.Getenv("NEXTAI_SCREENSHOT_DIR")
 	if dir == "" {
@@ -576,5 +645,32 @@ func TestRenderArtifact(t *testing.T) {
 		if err := f.Close(); err != nil {
 			t.Fatal(err)
 		}
+	}
+}
+
+func TestTranslationResultPreservesSingleLineBreaks(t *testing.T) {
+	a := testApp(t)
+	a.result = "单行文本"
+	single := ui.NewTester(a.View, 560, 880)
+	oneLine, ok := single.Find("单行文本")
+	if !ok {
+		t.Fatalf("missing single-line result: %v", single.Texts())
+	}
+
+	a.result = "第一行\n第二行\n第三行"
+	tt := ui.NewTester(a.View, 560, 880)
+	multiLine, ok := tt.Find("第一行\n第二行\n第三行")
+	if !ok {
+		t.Fatalf("missing rendered lines: %v", tt.Texts())
+	}
+	if multiLine.H < oneLine.H*2.2 {
+		t.Fatalf("expected 3-line height >= %.1f, got single=%+v multi=%+v", oneLine.H*2.2, oneLine, multiLine)
+	}
+
+	sample := "hello\nworld\n\n| a | b |\n| - | - |\n```go\nx := 1\ny := 2\n```\nafter\n"
+	full := markdownHardBreaks(sample)
+	want := "hello  \nworld  \n\n| a | b |\n| - | - |\n```go\nx := 1\ny := 2\n```\nafter  \n"
+	if full != want {
+		t.Fatalf("got %q, want %q", full, want)
 	}
 }

@@ -56,6 +56,7 @@ type App struct {
 	proxyPassword                                       string
 	pendingKeys                                         map[string]string
 	modelOptions                                        map[string][]string
+	modelFetched                                        map[string]bool
 	modelsBusy, proxyBusy, voicesBusy                   bool
 	voices                                              []desktop.Voice
 	voiceLanguage                                       string
@@ -77,7 +78,7 @@ func New(d core.Data, s core.Store) *App {
 	}
 	d.Settings.Target = d.Settings.DefaultTarget
 	client, clientErr := core.HTTPClient(d.Settings.Proxy, "")
-	a := &App{Data: d, Store: s, Engine: core.Engine{Client: client}, client: client, settingsDraft: d.Settings.Clone(), page: "translator", action: d.Actions[0].Name, editorPercent: 40, keys: map[string]string{}, keyLoaded: map[string]bool{}, keyLoading: map[string]bool{}, pendingKeys: map[string]string{}, modelOptions: map[string][]string{}, registered: map[string]string{}, voiceLanguage: "English"}
+	a := &App{Data: d, Store: s, Engine: core.Engine{Client: client}, client: client, settingsDraft: d.Settings.Clone(), page: "translator", action: d.Actions[0].Name, editorPercent: 40, keys: map[string]string{}, keyLoaded: map[string]bool{}, keyLoading: map[string]bool{}, pendingKeys: map[string]string{}, modelOptions: map[string][]string{}, modelFetched: map[string]bool{}, registered: map[string]string{}, voiceLanguage: "English"}
 	if clientErr != nil {
 		a.failure = clientErr.Error()
 	}
@@ -155,6 +156,7 @@ func (a *App) loadKey(provider string) {
 				if pending, ok := a.pendingKeys[provider]; ok {
 					a.apiKey = pending
 				}
+				a.maybeRefreshModels()
 			}
 		})
 	}()

@@ -16,8 +16,8 @@ import (
 	"unicode/utf16"
 	"unsafe"
 
-	"github.com/egoist/mygo"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
+	"github.com/egoist/mygo"
 )
 
 var user32 = syscall.NewLazyDLL("user32.dll")
@@ -91,7 +91,7 @@ func Paste(ctx context.Context, target uintptr) error {
 }
 
 func powershell(ctx context.Context, script, input string, env ...string) (string, error) {
-	cmd := exec.CommandContext(ctx, "powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-STA", "-Command", script)
+	cmd := exec.CommandContext(ctx, "powershell.exe", "-NoLogo", "-NoProfile", "-NonInteractive", "-STA", "-Command", "[Console]::OutputEncoding=[Text.Encoding]::UTF8\n"+script)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Env = append(os.Environ(), env...)
@@ -235,25 +235,16 @@ throw '未读取到指针位置的文字，请选择文本后重试'`, "", "NEXT
 var ocrScript string
 
 func OCR(ctx context.Context, path string) (string, error) {
-	return powershell(ctx, ocrScript, "", "NEXTAI_OCR_PATH="+path)
-}
-
-func Capture(ctx context.Context, path string) error {
-	_, err := powershell(ctx, `$ErrorActionPreference='Stop'
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-Add-Type -TypeDefinition 'using System.Runtime.InteropServices; public class ClipSeq { [DllImport("user32.dll")] public static extern uint GetClipboardSequenceNumber(); }'
-$seq=[ClipSeq]::GetClipboardSequenceNumber()
-Start-Process snippingtool.exe -ArgumentList '/clip'
-$until=[DateTime]::UtcNow.AddSeconds(45)
-while ([DateTime]::UtcNow -lt $until) {
-    Start-Sleep -Milliseconds 150
-    if ([ClipSeq]::GetClipboardSequenceNumber() -ne $seq -and [Windows.Forms.Clipboard]::ContainsImage()) {
-        $img=[Windows.Forms.Clipboard]::GetImage()
-        try { $img.Save($env:NEXTAI_CAPTURE_PATH,[Drawing.Imaging.ImageFormat]::Png) } finally { $img.Dispose() }
-        exit 0
-    }
-}
-throw 'Screenshot canceled or timed out'`, "", "NEXTAI_CAPTURE_PATH="+path)
-	return err
+	out, err := powershell(ctx, ocrScript, "", "NEXTAI_OCR_PATH="+path)
+	if err != nil {
+		return "", err
+	}
+	var results []string
+	if err := json.Unmarshal([]byte(out), &results); err != nil {
+		return "", fmt.Errorf("读取 OCR 结果: %w", err)
+	}
+	if len(results) == 0 {
+		return "", errors.New("OCR 未返回识别结果")
+	}
+	return bestOCRResult(results), nil
 }

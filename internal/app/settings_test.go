@@ -23,6 +23,10 @@ func TestSettingsTabsKeepSaveAndBackVisible(t *testing.T) {
 			if a.settingsTab != i {
 				t.Fatalf("tab %s was not selected", tab)
 			}
+			scroll, ok := tt.Find("设置内容")
+			if !ok || scroll.X != 0 || scroll.W != float32(size[0]) {
+				t.Fatalf("settings scroll not flush with window edges: %+v", scroll)
+			}
 			save, ok := tt.Find("保存设置")
 			if !ok || save.Y+save.H > float32(size[1]) || save.Y < float32(size[1]-100) {
 				t.Fatalf("save not fixed at bottom: %+v", save)
@@ -150,6 +154,36 @@ func TestSpeechVoiceAddAndRemove(t *testing.T) {
 	click(t, tt, "删除English音色")
 	if len(a.settingsDraft.Speech.Voices) != 0 {
 		t.Fatal("voice remove failed")
+	}
+}
+
+func TestAPIModelPickerSelectsFromListAndAllowsCustomInput(t *testing.T) {
+	a := testApp(t)
+	a.page = "settings"
+	a.modelOptions[a.profile.Endpoint] = []string{"gpt-4o-mini", "gpt-4.1", "antigravity/gemini-3.8-flash"}
+	tt := ui.NewTester(a.View, 560, 880)
+
+	click(t, tt, "展开模型名称")
+	click(t, tt, "gpt-4.1")
+	if a.profile.Model != "gpt-4.1" {
+		t.Fatalf("expected picked model gpt-4.1, got %q", a.profile.Model)
+	}
+
+	click(t, tt, "模型名称")
+	tt.Key(ui.Cmd, ui.KeyA)
+	tt.Type("custom/my-model")
+	click(t, tt, "代理")
+	if a.profile.Model != "custom/my-model" {
+		t.Fatalf("custom model name lost on blur: %q", a.profile.Model)
+	}
+
+	click(t, tt, "通用")
+	click(t, tt, "模型名称")
+	tt.Key(ui.Cmd, ui.KeyA)
+	tt.Type("gemini")
+	click(t, tt, "antigravity/gemini-3.8-flash")
+	if a.profile.Model != "antigravity/gemini-3.8-flash" {
+		t.Fatalf("filtered model pick failed: %q", a.profile.Model)
 	}
 }
 

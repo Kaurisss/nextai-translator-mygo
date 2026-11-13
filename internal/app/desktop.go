@@ -14,10 +14,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/egoist/mygo"
-	"github.com/egoist/mygo/ui"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/desktop"
+	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/ui"
 )
 
 func (a *App) Open(icon []byte) {
@@ -295,10 +295,30 @@ func (a *App) importImage() {
 	}()
 }
 
+func (a *App) dropImage(paths []string) {
+	for _, path := range paths {
+		switch strings.ToLower(filepath.Ext(path)) {
+		case ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp", ".tif", ".tiff":
+			if info, err := os.Stat(path); err == nil && !info.IsDir() {
+				a.systemBusy = true
+				a.failure = ""
+				go a.recognize(path)
+				return
+			}
+		}
+	}
+	a.failure = "请拖放 PNG、JPG、BMP、GIF、WebP 或 TIFF 图片"
+}
+
 func (a *App) screenshot() {
 	a.systemBusy = true
+	a.failure = ""
+	visible := a.Window.IsVisible()
 	a.Window.Hide()
 	go func() {
+		if visible {
+			time.Sleep(150 * time.Millisecond)
+		}
 		dir, err := os.MkdirTemp("", "nextai-capture-")
 		if err != nil {
 			a.update(func() { a.systemBusy = false; a.Window.Show(); a.failure = err.Error() })
@@ -309,7 +329,14 @@ func (a *App) screenshot() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
 		if err := desktop.Capture(ctx, path); err != nil {
-			a.update(func() { a.systemBusy = false; a.Window.Show(); a.failure = err.Error() })
+			a.update(func() {
+				a.systemBusy = false
+				a.Window.Show()
+				a.Window.Focus()
+				if !errors.Is(err, context.Canceled) {
+					a.failure = err.Error()
+				}
+			})
 			return
 		}
 		a.recognize(path)
@@ -323,8 +350,10 @@ func (a *App) recognize(path string) {
 	text, err := desktop.OCR(ctx, path)
 	a.update(func() {
 		a.systemBusy = false
-		a.Window.Show()
-		a.Window.Focus()
+		if a.Window != nil {
+			a.Window.Show()
+			a.Window.Focus()
+		}
 		if err != nil {
 			a.failure = "识别失败: " + err.Error()
 			return

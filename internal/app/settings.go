@@ -5,35 +5,68 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strings"
 	"time"
 
-	"github.com/egoist/mygo/ui"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/desktop"
+	"github.com/egoist/mygo/ui"
 )
 
 func (a *App) settings(c *ui.Context) {
 	t := c.Theme()
-	ui.Row(c).Gap(t.Space(2)).AlignItems(ui.Center).Children(func() {
-		ui.Image(c, a.logo).Size(t.Space(6), t.Space(6))
-		ui.Text(c, a.tr("设置")).FontSize(t.Rem(1.4)).Bold()
-	})
-	tabs := ui.TabsBase(c, &a.settingsTab, 5)
-	tabs.List.Label(a.tr("设置分类")).WidthPercent(100).Children(func() {
-		for i, tab := range []struct{ name, icon string }{{"通用", "settings"}, {"代理", "proxy"}, {"TTS", "speak"}, {"写作", "insert"}, {"快捷键", "keyboard"}} {
-			color := t.Border
-			if a.settingsTab == i {
-				color = t.Text
+	header := ui.Column(c).WidthPercent(100).BorderWidth(0, 0, 1, 0).BorderColor(t.Border)
+	if t.Background.R < 128 {
+		header.LinearGradient(ui.LinearGradient{
+			Angle: 125,
+			Oklab: true,
+			Stops: []ui.GradientStop{
+				{Color: t.Background, At: 0},
+				{Color: ui.RGB(48, 32, 46), At: 0.34},
+				{Color: ui.RGB(24, 48, 66), At: 0.56},
+				{Color: ui.RGB(36, 38, 64), At: 0.78},
+				{Color: t.Background, At: 1},
+			},
+		})
+	} else {
+		header.LinearGradient(ui.LinearGradient{
+			Angle: 125,
+			Oklab: true,
+			Stops: []ui.GradientStop{
+				{Color: t.Background, At: 0},
+				{Color: ui.RGB(250, 235, 245), At: 0.34},
+				{Color: ui.RGB(212, 240, 253), At: 0.56},
+				{Color: ui.RGB(228, 231, 252), At: 0.78},
+				{Color: t.Background, At: 1},
+			},
+		})
+	}
+	header.Children(func() {
+		ui.Row(c).Padding(t.Space(3), t.Space(5), t.Space(2)).Gap(t.Space(2.5)).AlignItems(ui.Center).Children(func() {
+			ui.Image(c, a.logo).Size(t.Space(6), t.Space(6)).Radius(t.Space(1.5))
+			ui.Text(c, "NextAI Translator").FontSize(t.Rem(1.3)).Bold()
+		})
+		tabs := ui.TabsBase(c, &a.settingsTab, 5)
+		tabs.List.Label(a.tr("设置分类")).WidthPercent(100).Children(func() {
+			for i, tab := range []struct{ name, icon string }{{"通用", "settings"}, {"代理", "proxy"}, {"TTS", "speak"}, {"写作", "insert"}, {"快捷键", "keyboard"}} {
+				border, textColor := ui.Transparent, t.TextMuted
+				if a.settingsTab == i {
+					border, textColor = t.Text, t.Text
+				}
+				tabEl := tabs.Tab(i).Label(a.tr(tab.name)).Tooltip(a.tr(tab.name)).WidthPercent(20).MinWidth(0).Row().AlignItems(ui.Center).Justify(ui.Center).Gap(t.Space(1.5)).Padding(t.Space(2.5), t.Space(1)).BorderWidth(0, 0, 2, 0).BorderColor(border).TextColor(textColor)
+				if tabEl.Hovered() && a.settingsTab != i {
+					tabEl.Background(t.Text.Alpha(0.05))
+				}
+				tabEl.Children(func() {
+					ui.Icon(c, icons[tab.icon]).Size(t.Space(4), t.Space(4))
+					ui.Text(c, a.tr(tab.name)).FontSize(12).SingleLine().Shrink(1)
+				})
 			}
-			tabs.Tab(i).Label(a.tr(tab.name)).Tooltip(a.tr(tab.name)).WidthPercent(20).MinWidth(0).Row().AlignItems(ui.Center).Justify(ui.Center).Gap(t.Space(1)).Padding(t.Space(3), t.Space(1)).BorderWidth(0, 0, 2, 0).BorderColor(color).Children(func() {
-				ui.Icon(c, icons[tab.icon]).Size(t.Space(4), t.Space(4))
-				ui.Text(c, a.tr(tab.name)).FontSize(12).SingleLine().Shrink(1)
-			})
-		}
+		})
 	})
 	c.Key(a.settingsTab)
 	ui.Scroll(c).Grow(1).WidthPercent(100).Label(a.tr("设置内容")).Children(func() {
-		ui.Column(c).Padding(t.Space(2), 0, t.Space(4)).Gap(t.Space(5)).Children(func() {
+		ui.Column(c).WidthPercent(100).Padding(t.Space(4), t.Space(5), t.Space(5)).Gap(t.Space(5)).Children(func() {
 			switch a.settingsTab {
 			case 0:
 				a.generalSettings(c)
@@ -49,17 +82,16 @@ func (a *App) settings(c *ui.Context) {
 		})
 	})
 	a.errorNotice(c)
-	ui.Divider(c)
 	ui.Toolbar(c, func() {
-		if ui.Button(c, a.tr("返回")).Label(a.tr("返回翻译")).Clicked() {
+		if iconTextButton(c, "back", a.tr("返回"), a.tr("返回翻译"), false).Clicked() {
 			a.recordingShortcut = ""
 			a.page = "translator"
 		}
 		ui.Spacer(c)
-		if ui.PrimaryButton(c, a.tr("保存")).Label(a.tr("保存设置")).Disabled(a.busy || a.systemBusy || a.keyLoading[a.profile.Provider] || a.keyLoading["proxy-password"]).Clicked() {
+		if iconTextButton(c, "save", a.tr("保存"), a.tr("保存设置"), true).Disabled(a.busy || a.systemBusy || a.keyLoading[a.profile.Provider] || a.keyLoading["proxy-password"]).Clicked() {
 			a.saveSettings()
 		}
-	}).Label(a.tr("设置操作")).WidthPercent(100)
+	}).Label(a.tr("设置操作")).WidthPercent(100).Padding(t.Space(2), t.Space(4)).BorderWidth(1, 0, 0, 0).BorderColor(t.Border)
 }
 
 func (a *App) generalSettings(c *ui.Context) {
@@ -94,6 +126,7 @@ func (a *App) generalSettings(c *ui.Context) {
 			if key, ok := a.pendingKeys[selected]; ok {
 				a.apiKey = key
 			}
+			a.maybeRefreshModels()
 		}
 		return control
 	})
@@ -103,7 +136,11 @@ func (a *App) generalSettings(c *ui.Context) {
 			if !a.showAPIKey {
 				input.Password()
 			}
-			if ui.Button(c, a.tr("显示")).Label(a.tr("显示或隐藏 API Key")).Clicked() {
+			eyeIcon := "eye"
+			if a.showAPIKey {
+				eyeIcon = "eye-off"
+			}
+			if iconTextButton(c, eyeIcon, a.tr("显示"), a.tr("显示或隐藏 API Key"), false).Clicked() {
 				a.showAPIKey = !a.showAPIKey
 			}
 		})
@@ -119,9 +156,9 @@ func (a *App) generalSettings(c *ui.Context) {
 					options = []string{p.Model}
 				}
 			}
-			ui.Autocomplete(c, &a.profile.Model, options).Label(a.tr("模型名称")).Grow(1)
-			if ui.Button(c, a.tr("刷新")).Label(a.tr("刷新模型列表")).Disabled(a.modelsBusy || a.profile.NoModelsAPI || a.keyLoading[a.profile.Provider]).Clicked() {
-				a.refreshModels()
+			a.modelPicker(c, &a.profile.Model, options, a.tr("模型名称"))
+			if iconTextButton(c, "refresh", a.tr("刷新"), a.tr("刷新模型列表"), false).Disabled(a.modelsBusy || a.profile.NoModelsAPI || a.keyLoading[a.profile.Provider]).Clicked() {
+				a.refreshModels(false)
 			}
 		})
 	})
@@ -185,10 +222,10 @@ func (a *App) generalSettings(c *ui.Context) {
 		return a.selectSetting(c, &s.Appearance, []string{"跟随系统", "浅色", "深色"}).Label(a.tr("外观"))
 	})
 	ui.Toolbar(c, func() {
-		if ui.Button(c, a.tr("导出备份")).Disabled(a.systemBusy).Clicked() {
+		if iconTextButton(c, "export", a.tr("导出备份"), "", false).Disabled(a.systemBusy).Clicked() {
 			a.export("backup")
 		}
-		if ui.Button(c, a.tr("导入备份")).Disabled(a.systemBusy).Clicked() {
+		if iconTextButton(c, "import", a.tr("导入备份"), "", false).Disabled(a.systemBusy).Clicked() {
 			a.importBackup()
 		}
 	}).Label(a.tr("备份操作"))
@@ -211,13 +248,17 @@ func (a *App) proxySettings(c *ui.Context) {
 			if !a.showProxyPassword {
 				input.Password()
 			}
-			if ui.Button(c, a.tr("显示")).Label(a.tr("显示或隐藏代理密码")).Clicked() {
+			eyeIcon := "eye"
+			if a.showProxyPassword {
+				eyeIcon = "eye-off"
+			}
+			if iconTextButton(c, eyeIcon, a.tr("显示"), a.tr("显示或隐藏代理密码"), false).Clicked() {
 				a.showProxyPassword = !a.showProxyPassword
 			}
 		})
 	})
 	settingsField(c, a.tr("无代理"), a.tr("使用英文逗号分隔域名、IP 或 CIDR"), func() ui.Element { return ui.TextArea(c, &p.NoProxy).Label(a.tr("无代理")).Lines(2, 4) })
-	if ui.Button(c, a.tr("测试")).Label(a.tr("测试代理")).Disabled(a.proxyBusy).Clicked() {
+	if iconTextButton(c, "test", a.tr("测试"), a.tr("测试代理"), false).Disabled(a.proxyBusy).Clicked() {
 		a.testProxy()
 	}
 	if a.proxyBusy {
@@ -243,7 +284,7 @@ func (a *App) speechSettings(c *ui.Context) {
 	settingsField(c, a.tr("速率"), fmt.Sprintf("%.2f×", s.Rate), func() ui.Element { return ui.Slider(c, &s.Rate, 0.5, 2).Label(a.tr("语速")) })
 	settingsField(c, a.tr("音量"), fmt.Sprintf("%.0f%%", s.Volume), func() ui.Element { return ui.Slider(c, &s.Volume, 0, 100).Label(a.tr("音量")) })
 	if s.Provider == "系统默认" {
-		if ui.Button(c, a.tr("刷新系统音色")).Disabled(a.voicesBusy).Clicked() {
+		if iconTextButton(c, "refresh", a.tr("刷新系统音色"), "", false).Disabled(a.voicesBusy).Clicked() {
 			a.refreshVoices()
 		}
 		if a.voicesBusy {
@@ -272,7 +313,7 @@ func (a *App) speechSettings(c *ui.Context) {
 					options = []string{"MeloTTS Chinese + English"}
 				}
 				a.selectSetting(c, &v.Name, options).Label(v.Language + " " + a.tr("音色")).Grow(1)
-				if ui.Button(c, a.tr("试听")).Label(a.tr("试听") + v.Language).Disabled(a.speaking).Clicked() {
+				if iconTextButton(c, "speak", a.tr("试听"), a.tr("试听")+v.Language, false).Disabled(a.speaking).Clicked() {
 					a.previewSpeech(v.Language)
 				}
 				if iconButton(c, "clear", a.tr("删除")+v.Language+a.tr("音色")).Clicked() {
@@ -290,7 +331,7 @@ func (a *App) speechSettings(c *ui.Context) {
 	}
 	ui.Row(c).Gap(c.Theme().Space(2)).Children(func() {
 		a.languagePicker(c, &a.voiceLanguage, languages, a.tr("音色语言")).Grow(1)
-		if ui.Button(c, a.tr("添加")).Label(a.tr("添加音色")).Clicked() {
+		if iconTextButton(c, "add", a.tr("添加"), a.tr("添加音色"), false).Clicked() {
 			if !slices.ContainsFunc(s.Voices, func(v core.SpeechVoice) bool {
 				provider := v.Provider
 				if provider == "" {
@@ -310,10 +351,10 @@ func (a *App) speechSettings(c *ui.Context) {
 		}
 	})
 	ui.Toolbar(c, func() {
-		if ui.Button(c, a.tr("试听")).Label(a.tr("试听 TTS")).Disabled(a.speaking).Clicked() {
+		if iconTextButton(c, "speak", a.tr("试听"), a.tr("试听 TTS"), false).Disabled(a.speaking).Clicked() {
 			a.previewSpeech(a.voiceLanguage)
 		}
-		if ui.Button(c, a.tr("停止")).Label(a.tr("停止试听")).Disabled(!a.speaking).Clicked() {
+		if iconTextButton(c, "stop", a.tr("停止"), a.tr("停止试听"), false).Disabled(!a.speaking).Clicked() {
 			a.stopSpeaking()
 		}
 	}).Label(a.tr("语音试听"))
@@ -384,14 +425,79 @@ func (a *App) shortcutField(c *ui.Context, label, description string, value *str
 	})
 }
 
-func (a *App) refreshModels() {
+func (a *App) modelPicker(c *ui.Context, value *string, options []string, label string) ui.Element {
+	t := c.Theme()
+	c.Key(label)
+	field := ui.Row(c).MinWidth(t.Space(22)).Grow(1).Height(t.Space(8)).AlignItems(ui.Center).
+		Padding(0, t.Space(2), 0, t.Space(2.5)).Gap(t.Space(1)).Radius(t.Radius).Background(t.Surface).Border(1, t.Border)
+	field.Children(func() {
+		cb := ui.ComboboxBase(c, value)
+		cb.Input.Label(label).AutoComplete(ui.AutoCompleteList).MinWidth(0).Grow(1).
+			Height(t.Space(7.5)).Padding(t.Space(1.5), 0).FocusRing(false)
+		arrow := ui.ButtonBase(c).Label(a.tr("展开")+label).Tooltip(a.tr("选择")+label).TabStop(false).KeepFocus().Size(t.Space(5), t.Space(7)).Padding(0).Center().Children(func() {
+			ui.Icon(c, icons["chevron"]).Size(t.Space(4), t.Space(4)).TextColor(t.TextMuted)
+		})
+		if cb.Input.Focused() {
+			field.Border(1, t.Focus)
+		}
+		if arrow.Clicked() {
+			cb.SetOpen(!cb.Open())
+			cb.Input.Focus()
+		}
+		shown := options
+		if cb.Filtering() {
+			shown = nil
+			query := strings.ToLower(strings.TrimSpace(*value))
+			for _, option := range options {
+				if strings.Contains(strings.ToLower(option), query) {
+					shown = append(shown, option)
+				}
+			}
+		}
+		cb.Popup(func(panel ui.Element) {
+			if len(shown) == 0 {
+				return
+			}
+			panel.AttachTo(field, ui.AnchorBottomStart, ui.AnchorTopStart).MinWidth(field.Bounds().W).
+				Padding(t.Space(1)).Background(t.Background).Border(1, t.Border).Radius(t.Radius)
+			ui.Scroll(c).MaxHeight(t.Space(70)).Children(func() {
+				for _, option := range shown {
+					item := cb.Item(option).Padding(t.Space(1.5), t.Space(2.5)).Radius(t.Radius)
+					if item.Highlighted() {
+						item.Background(t.Accent).TextColor(t.AccentText)
+					}
+					item.Children(func() { ui.Text(c, option).SingleLine() })
+				}
+			})
+		})
+		if choice, ok := cb.Chosen(); ok {
+			*value = choice
+		}
+	})
+	return field
+}
+
+func (a *App) maybeRefreshModels() {
+	if a.post == nil || a.profile.NoModelsAPI || a.modelsBusy || a.keyLoading[a.profile.Provider] || a.modelFetched[a.profile.Endpoint] || len(a.modelOptions[a.profile.Endpoint]) > 0 {
+		return
+	}
+	if a.apiKey == "" && a.profile.Provider != "Ollama" && a.profile.Provider != "LiteLLM" && !strings.Contains(a.profile.Endpoint, "127.0.0.1") && !strings.Contains(a.profile.Endpoint, "localhost") {
+		return
+	}
+	a.refreshModels(true)
+}
+
+func (a *App) refreshModels(silent bool) {
 	client, err := core.HTTPClient(a.settingsDraft.Proxy, a.proxyPassword)
 	if err != nil {
-		a.failure = err.Error()
+		if !silent {
+			a.failure = err.Error()
+		}
 		return
 	}
 	profile, key := a.profile, a.apiKey
 	a.modelsBusy = true
+	a.modelFetched[profile.Endpoint] = true
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
@@ -400,7 +506,9 @@ func (a *App) refreshModels() {
 		a.update(func() {
 			a.modelsBusy = false
 			if err != nil {
-				a.failure = err.Error()
+				if !silent {
+					a.failure = err.Error()
+				}
 			} else {
 				a.modelOptions[profile.Endpoint] = models.Names
 				if a.profile.Provider == profile.Provider && a.profile.Endpoint == profile.Endpoint {
@@ -410,7 +518,9 @@ func (a *App) refreshModels() {
 					draft.ModelThinking = models.Thinking
 					a.settingsDraft.Profiles[profile.Provider] = draft
 				}
-				a.notice = "模型列表已更新"
+				if !silent {
+					a.notice = "模型列表已更新"
+				}
 			}
 		})
 	}()

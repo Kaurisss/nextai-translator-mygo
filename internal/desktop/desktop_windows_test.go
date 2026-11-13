@@ -2,13 +2,28 @@ package desktop
 
 import (
 	"context"
-	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 	"os"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 )
+
+func TestWindowsPowerShellUTF8(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	const text = "截图失败：找不到指定的文件"
+	out, err := powershell(ctx, "[Console]::Write('"+text+"')", "")
+	if err != nil || out != text {
+		t.Fatalf("PowerShell output %q: %v", out, err)
+	}
+	_, err = powershell(ctx, "throw '"+text+"'", "")
+	if err == nil || !strings.Contains(err.Error(), text) {
+		t.Fatalf("PowerShell error: %v", err)
+	}
+}
 
 func TestWindowsOCR(t *testing.T) {
 	path := os.Getenv("NEXTAI_OCR_TEST_IMAGE")
