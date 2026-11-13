@@ -8,31 +8,55 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  release-please:
+  prepare:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
+      release_created: ${{ steps.version.outputs.release_created }}
+      tag_name: ${{ steps.version.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@v4
-        id: release
+      - uses: actions/checkout@v4
         with:
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
+          fetch-depth: 0
+
+      - name: Compute and tag release version
+        id: version
+        run: |
+          result=$(node scripts/release-version.mjs --apply)
+          echo "version_result=$result"
+          tag=$(node -e "const r = JSON.parse(process.argv[1]); console.log(r.tag || '')" "$result")
+          changed=$(node -e "const r = JSON.parse(process.argv[1]); console.log(r.changed ? 'true' : 'false')" "$result")
+          if [ -z "$tag" ]; then
+            echo "release_created=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$changed" = "true" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add mygo.json installer/windows.iss
+            git commit -m "chore(release): $tag [skip ci]"
+            git push origin HEAD:main
+          fi
+          git tag "$tag"
+          git push origin "$tag"
+          echo "tag_name=$tag" >> "$GITHUB_OUTPUT"
+          echo "release_created=true" >> "$GITHUB_OUTPUT"
 
   build:
-    needs: release-please
-    if: ${{ always() && !cancelled() && needs.release-please.result != 'failure' && (needs.release-please.outputs.release_created == 'true' || startsWith(github.ref, 'refs/tags/v')) }}
+    needs: prepare
+    if: ${{ always() && !cancelled() && needs.prepare.result != 'failure' && (needs.prepare.outputs.release_created == 'true' || startsWith(github.ref, 'refs/tags/v')) }}
     uses: ./.github/workflows/build.yml
     with:
-      ref: ${{ needs.release-please.outputs.tag_name || github.ref }}
+      ref: ${{ needs.prepare.outputs.tag_name || github.ref }}
 
   publish:
-    needs: [release-please, build]
+    needs: [prepare, build]
     if: ${{ always() && !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
@@ -42,13 +66,14 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Upload release assets
+      - name: Create or update release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TAG: ${{ needs.release-please.outputs.tag_name || github.ref_name }}
+          TAG: ${{ needs.prepare.outputs.tag_name || github.ref_name }}
         run: |
-          if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" --title "$TAG" --generate-notes
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" dist/* --title "$TAG" --generate-notes
           fi
-          gh release upload "$TAG" dist/* --clobber
