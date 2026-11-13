@@ -1,6 +1,6 @@
 #ifndef AppVersion
   ; x-release-please-start-version
-  #define AppVersion "0.0.1"
+  #define AppVersion "0.0.2"
   ; x-release-please-end
 #endif
 #ifndef SourceDir
