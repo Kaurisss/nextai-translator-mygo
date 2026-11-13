@@ -1,0 +1,132 @@
+[
+  {
+    "model": "gpt-3.5-turbo",
+    "expected": {
+      "model": "gpt-3.5-turbo",
+      "temperature": 0,
+      "top_p": 1,
+      "frequency_penalty": 1,
+      "presence_penalty": 1,
+      "stream": true
+    }
+  },
+  {
+    "model": "gpt-4o-mini",
+    "expected": {
+      "model": "gpt-4o-mini",
+      "temperature": 0,
+      "top_p": 1,
+      "frequency_penalty": 1,
+      "presence_penalty": 1,
+      "stream": true
+    }
+  },
+  {
+    "model": "GPT-4.1",
+    "expected": {
+      "model": "GPT-4.1",
+      "temperature": 0,
+      "top_p": 1,
+      "frequency_penalty": 1,
+      "presence_penalty": 1,
+      "stream": true
+    }
+  },
+  {
+    "model": "o1",
+    "expected": {
+      "model": "o1",
+      "stream": true,
+      "reasoning_effort": "low"
+    }
+  },
+  {
+    "model": "o3-mini",
+    "expected": {
+      "model": "o3-mini",
+      "stream": true,
+      "reasoning_effort": "low"
+    }
+  },
+  {
+    "model": "gpt-5",
+    "expected": {
+      "model": "gpt-5",
+      "stream": true,
+      "reasoning_effort": "minimal"
+    }
+  },
+  {
+    "model": "gpt-5-mini",
+    "expected": {
+      "model": "gpt-5-mini",
+      "stream": true,
+      "reasoning_effort": "minimal"
+    }
+  },
+  {
+    "model": "gpt-5.0",
+    "expected": {
+      "model": "gpt-5.0",
+      "stream": true
+    }
+  },
+  {
+    "model": "gpt-5-pro",
+    "expected": {
+      "model": "gpt-5-pro",
+      "stream": true,
+      "reasoning_effort": "low"
+    }
+  },
+  {
+    "model": "gpt-5.0-mini-pro",
+    "expected": {
+      "model": "gpt-5.0-mini-pro",
+      "stream": true,
+      "reasoning_effort": "low"
+    }
+  },
+  {
+    "model": "gpt-5-chat-latest",
+    "expected": {
+      "model": "gpt-5-chat-latest",
+      "stream": true
+    }
+  },
+  {
+    "model": "gpt-5-codex",
+    "expected": {
+      "model": "gpt-5-codex",
+      "stream": true
+    }
+  },
+  {
+    "model": "gpt-5.1",
+    "expected": {
+      "model": "gpt-5.1",
+      "stream": true
+    }
+  },
+  {
+    "model": "gpt-5.5",
+    "expected": {
+      "model": "gpt-5.5",
+      "stream": true
+    }
+  },
+  {
+    "model": "antigravity/gemini-3.5-flash-lite",
+    "expected": {
+      "model": "antigravity/gemini-3.5-flash-lite",
+      "stream": true
+    }
+  },
+  {
+    "model": "deepseek-chat",
+    "expected": {
+      "model": "deepseek-chat",
+      "stream": true
+    }
+  }
+]

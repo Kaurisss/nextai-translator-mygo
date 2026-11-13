@@ -1,0 +1,126 @@
+[
+  {
+    "model": "gemini-2.5-flash",
+    "enabled": false,
+    "expected": {
+      "thinkingBudget": 0
+    }
+  },
+  {
+    "model": "gemini-2.5-flash",
+    "enabled": true,
+    "expected": {
+      "thinkingBudget": -1
+    }
+  },
+  {
+    "model": "gemini-2.5-pro",
+    "enabled": false,
+    "expected": {
+      "thinkingBudget": 128
+    }
+  },
+  {
+    "model": "gemini-2.5-pro",
+    "enabled": true,
+    "expected": {
+      "thinkingBudget": -1
+    }
+  },
+  {
+    "model": "gemini-3-flash",
+    "enabled": false,
+    "expected": {
+      "thinkingLevel": "minimal"
+    }
+  },
+  {
+    "model": "gemini-3-flash",
+    "enabled": true,
+    "expected": {}
+  },
+  {
+    "model": "gemini-3.6-flash",
+    "enabled": false,
+    "expected": {
+      "thinkingLevel": "minimal"
+    }
+  },
+  {
+    "model": "gemini-3.6-flash",
+    "enabled": true,
+    "expected": {}
+  },
+  {
+    "model": "gemini-3.8-flash",
+    "enabled": false,
+    "expected": {
+      "thinkingLevel": "low"
+    }
+  },
+  {
+    "model": "gemini-3.8-flash",
+    "enabled": true,
+    "expected": {}
+  },
+  {
+    "model": "gemini-4-argon",
+    "enabled": false,
+    "expected": {
+      "thinkingLevel": "low"
+    }
+  },
+  {
+    "model": "gemini-4-argon",
+    "enabled": true,
+    "expected": {}
+  },
+  {
+    "model": "gemini-robotics-er-2",
+    "enabled": false,
+    "expected": {
+      "thinkingLevel": "low"
+    }
+  },
+  {
+    "model": "gemini-robotics-er-2",
+    "enabled": true,
+    "expected": {}
+  },
+  {
+    "model": "gemma-4",
+    "enabled": false,
+    "expected": {
+      "thinkingLevel": "minimal"
+    }
+  },
+  {
+    "model": "gemma-4",
+    "enabled": true,
+    "expected": {
+      "thinkingLevel": "high"
+    }
+  },
+  {
+    "model": "gemini-flash-latest",
+    "enabled": false,
+    "expected": {
+      "thinkingLevel": "low"
+    }
+  },
+  {
+    "model": "gemini-flash-latest",
+    "enabled": true,
+    "expected": {}
+  },
+  {
+    "model": "gateway-alias",
+    "enabled": false,
+    "expected": null
+  },
+  {
+    "model": "gateway-alias",
+    "enabled": true,
+    "expected": null
+  }
+]

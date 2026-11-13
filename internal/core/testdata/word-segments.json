@@ -1,0 +1,107 @@
+[
+  {
+    "locale": "zh-Hans",
+    "text": "你好",
+    "expected": true
+  },
+  {
+    "locale": "zh-Hans",
+    "text": "你好。",
+    "expected": false
+  },
+  {
+    "locale": "zh-Hans",
+    "text": "你好.",
+    "expected": false
+  },
+  {
+    "locale": "zh-Hans",
+    "text": "中华人民共和国",
+    "expected": false
+  },
+  {
+    "locale": "zh-Hans",
+    "text": "这是一个句子",
+    "expected": false
+  },
+  {
+    "locale": "zh-Hans",
+    "text": "世界",
+    "expected": true
+  },
+  {
+    "locale": "zh-Hans",
+    "text": "你好 世界",
+    "expected": false
+  },
+  {
+    "locale": "en",
+    "text": "hello",
+    "expected": true
+  },
+  {
+    "locale": "en",
+    "text": "hello.",
+    "expected": false
+  },
+  {
+    "locale": "en",
+    "text": "don't",
+    "expected": true
+  },
+  {
+    "locale": "en",
+    "text": "well-known",
+    "expected": false
+  },
+  {
+    "locale": "en",
+    "text": "Hello world",
+    "expected": false
+  },
+  {
+    "locale": "en",
+    "text": ".",
+    "expected": true
+  },
+  {
+    "locale": "en",
+    "text": "123",
+    "expected": true
+  },
+  {
+    "locale": "en",
+    "text": "😀",
+    "expected": true
+  },
+  {
+    "locale": "en",
+    "text": "",
+    "expected": false
+  },
+  {
+    "locale": "ja",
+    "text": "こんにちは",
+    "expected": true
+  },
+  {
+    "locale": "ja",
+    "text": "日本語",
+    "expected": true
+  },
+  {
+    "locale": "ja",
+    "text": "日本語のテスト",
+    "expected": false
+  },
+  {
+    "locale": "th",
+    "text": "สวัสดี",
+    "expected": true
+  },
+  {
+    "locale": "th",
+    "text": "สวัสดีครับ",
+    "expected": false
+  }
+]

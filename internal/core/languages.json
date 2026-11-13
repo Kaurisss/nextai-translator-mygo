@@ -1,0 +1,570 @@
+[
+  {
+    "code": "en",
+    "name": "English",
+    "nameEn": "English",
+    "promptName": "English",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "en-US",
+    "name": "American English",
+    "nameEn": "English (US)",
+    "promptName": "American English",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "en-GB",
+    "name": "British English",
+    "nameEn": "English (UK)",
+    "promptName": "British English",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "en-CA",
+    "name": "Canadian English",
+    "nameEn": "English (Canada)",
+    "promptName": "Canadian English",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "en-AU",
+    "name": "Australian English",
+    "nameEn": "English (Australia)",
+    "promptName": "Australian English",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "zh-Hans",
+    "name": "简体中文",
+    "nameEn": "Simplified Chinese",
+    "promptName": "简体中文",
+    "phoneticNotation": "Pinyin",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "zh-Hant",
+    "name": "繁體中文",
+    "nameEn": "Traditional Chinese",
+    "promptName": "繁體中文",
+    "phoneticNotation": "Bopomofo",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "yue",
+    "name": "粤语",
+    "nameEn": "Cantonese",
+    "promptName": "粤语",
+    "phoneticNotation": "Jyutping",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "lzh",
+    "name": "古文",
+    "nameEn": "Classical Chinese",
+    "promptName": "古文",
+    "phoneticNotation": "Pinyin",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "jdbhw",
+    "name": "近代白话文",
+    "nameEn": "Modern Standard Chinese",
+    "promptName": "近代白话文",
+    "phoneticNotation": "Gwoyeu Romatzyh",
+    "rolePrompt": "您是一位在中文系研究中文的资深学者"
+  },
+  {
+    "code": "xdbhw",
+    "name": "现代白话文",
+    "nameEn": "Contemporary Chinese",
+    "promptName": "现代白话文",
+    "phoneticNotation": "Hanyu Pinyin",
+    "rolePrompt": "您是一位在中文系研究中文的资深学者"
+  },
+  {
+    "code": "ja",
+    "name": "日本語",
+    "nameEn": "Japanese",
+    "promptName": "Japanese",
+    "phoneticNotation": "hiragana",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ko",
+    "name": "한국어",
+    "nameEn": "Korean",
+    "promptName": "Korean",
+    "phoneticNotation": "Revised Romanization",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ko-banmal",
+    "name": "한국어 반말",
+    "nameEn": "Korean",
+    "promptName": "한국어 반말",
+    "phoneticNotation": "Revised Romanization",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "fr",
+    "name": "Français",
+    "nameEn": "French",
+    "promptName": "French",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "de",
+    "name": "Deutsch",
+    "nameEn": "German",
+    "promptName": "German",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "es",
+    "name": "Español",
+    "nameEn": "Spanish",
+    "promptName": "Spanish",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "it",
+    "name": "Italiano",
+    "nameEn": "Italian",
+    "promptName": "Italian",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ru",
+    "name": "Русский",
+    "nameEn": "Russian",
+    "promptName": "Russian",
+    "phoneticNotation": "Latin transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "pt",
+    "name": "Português",
+    "nameEn": "Portuguese",
+    "promptName": "Portuguese",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "nl",
+    "name": "Nederlands",
+    "nameEn": "Dutch",
+    "promptName": "Dutch",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "pl",
+    "name": "Polski",
+    "nameEn": "Polish",
+    "promptName": "Polish",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ar",
+    "name": "العربية",
+    "nameEn": "Arabic",
+    "promptName": "Arabic",
+    "phoneticNotation": "Arabic script",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "af",
+    "name": "Afrikaans",
+    "nameEn": "Afrikaans",
+    "promptName": "Afrikaans",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "am",
+    "name": "አማርኛ",
+    "nameEn": "Amharic",
+    "promptName": "Amharic",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "az",
+    "name": "Azərbaycan",
+    "nameEn": "Azerbaijani",
+    "promptName": "Azerbaijani",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "be",
+    "name": "Беларуская",
+    "nameEn": "Belarusian",
+    "promptName": "Belarusian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "bg",
+    "name": "Български",
+    "nameEn": "Bulgarian",
+    "promptName": "Bulgarian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "bn",
+    "name": "বাংলা",
+    "nameEn": "Bengali",
+    "promptName": "Bengali",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "bs",
+    "name": "Bosanski",
+    "nameEn": "Bosnian",
+    "promptName": "Bosnian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ca",
+    "name": "Català",
+    "nameEn": "Catalan",
+    "promptName": "Catalan",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ceb",
+    "name": "Cebuano",
+    "nameEn": "Cebuano",
+    "promptName": "Cebuano",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "co",
+    "name": "Corsu",
+    "nameEn": "Corsican",
+    "promptName": "Corsican",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "cs",
+    "name": "Čeština",
+    "nameEn": "Czech",
+    "promptName": "Czech",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "cy",
+    "name": "Cymraeg",
+    "nameEn": "Welsh",
+    "promptName": "Welsh",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "da",
+    "name": "Dansk",
+    "nameEn": "Danish",
+    "promptName": "Danish",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "el",
+    "name": "Ελληνικά",
+    "nameEn": "Greek",
+    "promptName": "Greek",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "eo",
+    "name": "Esperanto",
+    "nameEn": "Esperanto",
+    "promptName": "Esperanto",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "et",
+    "name": "Eesti",
+    "nameEn": "Estonian",
+    "promptName": "Estonian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "eu",
+    "name": "Euskara",
+    "nameEn": "Basque",
+    "promptName": "Basque",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "fa",
+    "name": "فارسی",
+    "nameEn": "Persian",
+    "promptName": "Persian",
+    "phoneticNotation": "latin transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "fi",
+    "name": "Suomi",
+    "nameEn": "Finnish",
+    "promptName": "Finnish",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "fj",
+    "name": "Fijian",
+    "nameEn": "Fijian",
+    "promptName": "Fijian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "fy",
+    "name": "Frysk",
+    "nameEn": "Frisian",
+    "promptName": "Western Frisian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ga",
+    "name": "Gaeilge",
+    "nameEn": "Irish",
+    "promptName": "Irish",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "gd",
+    "name": "Gàidhlig",
+    "nameEn": "Scottish Gaelic",
+    "promptName": "Scottish Gaelic",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "gl",
+    "name": "Galego",
+    "nameEn": "Galician",
+    "promptName": "Galician",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "gu",
+    "name": "ગુજરાતી",
+    "nameEn": "Gujarati",
+    "promptName": "Gujarati",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ha",
+    "name": "Hausa",
+    "nameEn": "Hausa",
+    "promptName": "Hausa",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "haw",
+    "name": "Hawaiʻi",
+    "nameEn": "Hawaiian",
+    "promptName": "Hawaiʻi",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "he",
+    "name": "עברית",
+    "nameEn": "Hebrew",
+    "promptName": "Hebrew",
+    "phoneticNotation": "latin transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "hi",
+    "name": "हिन्दी",
+    "nameEn": "Hindi",
+    "promptName": "Hindi",
+    "phoneticNotation": "latin transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "hmn",
+    "name": "Hmong",
+    "nameEn": "Hmong",
+    "promptName": "Hmong",
+    "phoneticNotation": "latin transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "hr",
+    "name": "Hrvatski",
+    "nameEn": "Croatian",
+    "promptName": "Croatian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ht",
+    "name": "Kreyòl Ayisyen",
+    "nameEn": "Haitian Creole",
+    "promptName": "Haitian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "hu",
+    "name": "Magyar",
+    "nameEn": "Hungarian",
+    "promptName": "Hungarian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "hy",
+    "name": "Հայերեն",
+    "nameEn": "Armenian",
+    "promptName": "Armenian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "id",
+    "name": "Bahasa Indonesia",
+    "nameEn": "Indonesian",
+    "promptName": "Indonesian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ig",
+    "name": "Igbo",
+    "nameEn": "Igbo",
+    "promptName": "Igbo",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "is",
+    "name": "Íslenska",
+    "nameEn": "Icelandic",
+    "promptName": "Icelandic",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "jw",
+    "name": "Jawa",
+    "nameEn": "Javanese",
+    "promptName": "Jawa",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ka",
+    "name": "ქართული",
+    "nameEn": "Georgian",
+    "promptName": "Georgian",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "kk",
+    "name": "Қазақ",
+    "nameEn": "Kazakh",
+    "promptName": "Kazakh",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "mn",
+    "name": "Монгол хэл",
+    "nameEn": "Mongolian",
+    "promptName": "Mongolian",
+    "phoneticNotation": "Latin script",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "tr",
+    "name": "Türkçe",
+    "nameEn": "Turkish",
+    "promptName": "Turkish",
+    "phoneticNotation": "transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ug",
+    "name": "ئۇيغۇر تىلى",
+    "nameEn": "Uyghur",
+    "promptName": "Uyghur",
+    "phoneticNotation": "Latin Yëziqi",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "uk",
+    "name": "Українська",
+    "nameEn": "Ukrainian",
+    "promptName": "Ukrainian",
+    "phoneticNotation": "national transcription",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "ur",
+    "name": "اردو",
+    "nameEn": "Urdu",
+    "promptName": "Urdu",
+    "phoneticNotation": "Urdu script",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "vi",
+    "name": "Tiếng Việt",
+    "nameEn": "Vietnamese",
+    "promptName": "Vietnamese",
+    "phoneticNotation": "",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "sv",
+    "name": "Svenska",
+    "nameEn": "Swedish",
+    "promptName": "Swedish",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  },
+  {
+    "code": "th",
+    "name": "ไทย",
+    "nameEn": "Thai",
+    "promptName": "Thai",
+    "phoneticNotation": "IPA",
+    "rolePrompt": "You are a professional translator."
+  }
+]

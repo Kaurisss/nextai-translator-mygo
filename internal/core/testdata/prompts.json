@@ -1,0 +1,3109 @@
+[
+  {
+    "name": "Chinese word",
+    "query": {
+      "Text": "你好",
+      "Source": "zh-Hans",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional 简体中文-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, bilingual  sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <translated meaning> /  <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>",
+      "commandPrompt": "Only reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: 你好",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional 简体中文-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, bilingual  sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <translated meaning> /  <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>\n\nOnly reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: 你好"
+      }
+    ]
+  },
+  {
+    "name": "Chinese punctuation",
+    "query": {
+      "Text": "你好。",
+      "Source": "zh-Hans",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\n你好。",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\n你好。"
+      }
+    ]
+  },
+  {
+    "name": "Chinese ASCII punctuation",
+    "query": {
+      "Text": "你好.",
+      "Source": "zh-Hans",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\n你好.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\n你好."
+      }
+    ]
+  },
+  {
+    "name": "Chinese sentence",
+    "query": {
+      "Text": "你好，这是一个完整的句子。",
+      "Source": "zh-Hans",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\n你好，这是一个完整的句子。",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\n你好，这是一个完整的句子。"
+      }
+    ]
+  },
+  {
+    "name": "Chinese phrase",
+    "query": {
+      "Text": "中华人民共和国",
+      "Source": "zh-Hans",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\n中华人民共和国",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\n中华人民共和国"
+      }
+    ]
+  },
+  {
+    "name": "English word to Chinese",
+    "query": {
+      "Text": "hello",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标或转写、所有含义（含词性）、双语示例，至少三条例句。如果你认为单词拼写错误，请提示我最可能的正确拼写，否则请严格按照下面格式给到翻译结果：\n    <单词>\n    [<语种>]· / <Pinyin>\n    [<词性缩写>] <中文含义>]\n    例句：\n    <序号><例句>(例句翻译)\n    词源：\n    <词源>",
+      "commandPrompt": "Only reply the result and nothing else. 好的，我明白了，请给我这个单词。:\n\n单词是：hello",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标或转写、所有含义（含词性）、双语示例，至少三条例句。如果你认为单词拼写错误，请提示我最可能的正确拼写，否则请严格按照下面格式给到翻译结果：\n    <单词>\n    [<语种>]· / <Pinyin>\n    [<词性缩写>] <中文含义>]\n    例句：\n    <序号><例句>(例句翻译)\n    词源：\n    <词源>\n\nOnly reply the result and nothing else. 好的，我明白了，请给我这个单词。:\n\n单词是：hello"
+      }
+    ]
+  },
+  {
+    "name": "English word to traditional Chinese",
+    "query": {
+      "Text": "hello",
+      "Source": "en",
+      "Target": "zh-Hant",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标或转写、所有含义（含词性）、双语示例，至少三条例句。如果你认为单词拼写错误，请提示我最可能的正确拼写，否则请严格按照下面格式给到翻译结果：\n    <单词>\n    [<语种>]· / <Bopomofo>\n    [<词性缩写>] <中文含义>]\n    例句：\n    <序号><例句>(例句翻译)\n    词源：\n    <词源>",
+      "commandPrompt": "Only reply the result and nothing else. 好的，我明白了，请给我这个单词。:\n\n单词是：hello",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标或转写、所有含义（含词性）、双语示例，至少三条例句。如果你认为单词拼写错误，请提示我最可能的正确拼写，否则请严格按照下面格式给到翻译结果：\n    <单词>\n    [<语种>]· / <Bopomofo>\n    [<词性缩写>] <中文含义>]\n    例句：\n    <序号><例句>(例句翻译)\n    词源：\n    <词源>\n\nOnly reply the result and nothing else. 好的，我明白了，请给我这个单词。:\n\n单词是：hello"
+      }
+    ]
+  },
+  {
+    "name": "English word same language",
+    "query": {
+      "Text": "hello",
+      "Source": "en",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional English-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>",
+      "commandPrompt": "Only reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: hello",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional English-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>\n\nOnly reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: hello"
+      }
+    ]
+  },
+  {
+    "name": "Short target Chinese",
+    "query": {
+      "Text": "hi!",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "你是一个翻译引擎，请将给到的文本翻译成简体中文。请列出3种（如果有）最常用翻译结果：单词或短语，并列出对应的适用语境（用中文阐述）、音标或转写、词性、双语示例。按照下面格式用中文阐述：\n    <序号><单词或短语> · /<Pinyin>/\n    [<词性缩写>] <适用语境（用中文阐述）>\n    例句：<例句>(例句翻译)",
+      "commandPrompt": "Only reply the result and nothing else. :\n\nhi!",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "你是一个翻译引擎，请将给到的文本翻译成简体中文。请列出3种（如果有）最常用翻译结果：单词或短语，并列出对应的适用语境（用中文阐述）、音标或转写、词性、双语示例。按照下面格式用中文阐述：\n    <序号><单词或短语> · /<Pinyin>/\n    [<词性缩写>] <适用语境（用中文阐述）>\n    例句：<例句>(例句翻译)\n\nOnly reply the result and nothing else. :\n\nhi!"
+      }
+    ]
+  },
+  {
+    "name": "Word trims whitespace",
+    "query": {
+      "Text": "  hello  ",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标或转写、所有含义（含词性）、双语示例，至少三条例句。如果你认为单词拼写错误，请提示我最可能的正确拼写，否则请严格按照下面格式给到翻译结果：\n    <单词>\n    [<语种>]· / <Pinyin>\n    [<词性缩写>] <中文含义>]\n    例句：\n    <序号><例句>(例句翻译)\n    词源：\n    <词源>",
+      "commandPrompt": "Only reply the result and nothing else. 好的，我明白了，请给我这个单词。:\n\n单词是：  hello",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标或转写、所有含义（含词性）、双语示例，至少三条例句。如果你认为单词拼写错误，请提示我最可能的正确拼写，否则请严格按照下面格式给到翻译结果：\n    <单词>\n    [<语种>]· / <Pinyin>\n    [<词性缩写>] <中文含义>]\n    例句：\n    <序号><例句>(例句翻译)\n    词源：\n    <词源>\n\nOnly reply the result and nothing else. 好的，我明白了，请给我这个单词。:\n\n单词是：  hello"
+      }
+    ]
+  },
+  {
+    "name": "Sentence preserves leading whitespace",
+    "query": {
+      "Text": "  Hello, world!  \n",
+      "Source": "en",
+      "Target": "fr",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Français:\n\n  Hello, world!",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Français:\n\n  Hello, world!"
+      }
+    ]
+  },
+  {
+    "name": "Hyphenated word",
+    "query": {
+      "Text": "well-known",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 简体中文:\n\nwell-known",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to 简体中文:\n\nwell-known"
+      }
+    ]
+  },
+  {
+    "name": "Contraction",
+    "query": {
+      "Text": "don't",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标或转写、所有含义（含词性）、双语示例，至少三条例句。如果你认为单词拼写错误，请提示我最可能的正确拼写，否则请严格按照下面格式给到翻译结果：\n    <单词>\n    [<语种>]· / <Pinyin>\n    [<词性缩写>] <中文含义>]\n    例句：\n    <序号><例句>(例句翻译)\n    词源：\n    <词源>",
+      "commandPrompt": "Only reply the result and nothing else. 好的，我明白了，请给我这个单词。:\n\n单词是：don't",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标或转写、所有含义（含词性）、双语示例，至少三条例句。如果你认为单词拼写错误，请提示我最可能的正确拼写，否则请严格按照下面格式给到翻译结果：\n    <单词>\n    [<语种>]· / <Pinyin>\n    [<词性缩写>] <中文含义>]\n    例句：\n    <序号><例句>(例句翻译)\n    词源：\n    <词源>\n\nOnly reply the result and nothing else. 好的，我明白了，请给我这个单词。:\n\n单词是：don't"
+      }
+    ]
+  },
+  {
+    "name": "Punctuation segment",
+    "query": {
+      "Text": ".",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标或转写、所有含义（含词性）、双语示例，至少三条例句。如果你认为单词拼写错误，请提示我最可能的正确拼写，否则请严格按照下面格式给到翻译结果：\n    <单词>\n    [<语种>]· / <Pinyin>\n    [<词性缩写>] <中文含义>]\n    例句：\n    <序号><例句>(例句翻译)\n    词源：\n    <词源>",
+      "commandPrompt": "Only reply the result and nothing else. 好的，我明白了，请给我这个单词。:\n\n单词是：.",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "你是一个翻译引擎，请翻译给出的文本，只需要翻译不需要解释。当且仅当文本只有一个单词时，请给出单词原始形态（如果有）、单词的语种、对应的音标或转写、所有含义（含词性）、双语示例，至少三条例句。如果你认为单词拼写错误，请提示我最可能的正确拼写，否则请严格按照下面格式给到翻译结果：\n    <单词>\n    [<语种>]· / <Pinyin>\n    [<词性缩写>] <中文含义>]\n    例句：\n    <序号><例句>(例句翻译)\n    词源：\n    <词源>\n\nOnly reply the result and nothing else. 好的，我明白了，请给我这个单词。:\n\n单词是：."
+      }
+    ]
+  },
+  {
+    "name": "Number segment",
+    "query": {
+      "Text": "123",
+      "Source": "en",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional English-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>",
+      "commandPrompt": "Only reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: 123",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional English-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>\n\nOnly reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: 123"
+      }
+    ]
+  },
+  {
+    "name": "Japanese word",
+    "query": {
+      "Text": "こんにちは",
+      "Source": "ja",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional Japanese-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, bilingual  sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <translated meaning> /  <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>",
+      "commandPrompt": "Only reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: こんにちは",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional Japanese-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, bilingual  sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <translated meaning> /  <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>\n\nOnly reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: こんにちは"
+      }
+    ]
+  },
+  {
+    "name": "Vietnamese no phonetic notation",
+    "query": {
+      "Text": "hello",
+      "Source": "en",
+      "Target": "vi",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translation engine. Please translate the text into Vietnamese without explanation. When the text has only one word, please act as a professional English-Vietnamese dictionary, and list the original form of the word (if any), the language of the word, false all senses with parts of speech, bilingual  sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / false\n[<part of speech>] <translated meaning> /  <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>",
+      "commandPrompt": "Only reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: hello",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translation engine. Please translate the text into Vietnamese without explanation. When the text has only one word, please act as a professional English-Vietnamese dictionary, and list the original form of the word (if any), the language of the word, false all senses with parts of speech, bilingual  sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / false\n[<part of speech>] <translated meaning> /  <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>\n\nOnly reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: hello"
+      }
+    ]
+  },
+  {
+    "name": "Korean banmal",
+    "query": {
+      "Text": "Hello, how are you?",
+      "Source": "en",
+      "Target": "ko-banmal",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Translate from English to Korean banmal. Please use 이다 and 다 endings. Never use formal or honorific endings. Return translated text only.:\n\nHello, how are you?",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Translate from English to Korean banmal. Please use 이다 and 다 endings. Never use formal or honorific endings. Return translated text only.:\n\nHello, how are you?"
+      }
+    ]
+  },
+  {
+    "name": "Writing bypasses word mode",
+    "query": {
+      "Text": "hello",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": true,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 简体中文:\n\nhello",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to 简体中文:\n\nhello"
+      }
+    ]
+  },
+  {
+    "name": "Selected word context",
+    "query": {
+      "Text": "The bank is closed.",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "bank",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are an expert in the semantic syntax of the English language, and you are teaching me the English language. I will give you a sentence in English and a word from that sentence. Firstly, provide the corresponding phonetic notation or transcription of the word in English. Then, help me explain in 简体中文 what the word means in the sentence, what the sentence itself means, and whether the word is part of an idiom in the sentence. If it is, explain the idiom in the sentence. Provide 3 to 5 examples in English with the same meaning, and explain these examples in 简体中文. The answer should follow the format below:\n\n<word> · /<IPA>/\n<the remaining part>\n\nIf you understand, say \"yes\", and then we will begin.",
+      "commandPrompt": "Only reply the result and nothing else. Yes, I understand. Please give me the sentence and the word.:\n\nthe sentence is: The bank is closed.\n\nthe word is: bank",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are an expert in the semantic syntax of the English language, and you are teaching me the English language. I will give you a sentence in English and a word from that sentence. Firstly, provide the corresponding phonetic notation or transcription of the word in English. Then, help me explain in 简体中文 what the word means in the sentence, what the sentence itself means, and whether the word is part of an idiom in the sentence. If it is, explain the idiom in the sentence. Provide 3 to 5 examples in English with the same meaning, and explain these examples in 简体中文. The answer should follow the format below:\n\n<word> · /<IPA>/\n<the remaining part>\n\nIf you understand, say \"yes\", and then we will begin.\n\nOnly reply the result and nothing else. Yes, I understand. Please give me the sentence and the word.:\n\nthe sentence is: The bank is closed.\n\nthe word is: bank"
+      }
+    ]
+  },
+  {
+    "name": "Polishing",
+    "query": {
+      "Text": "This are a test.",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "polishing",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are an expert translator, translate directly without explanation.",
+      "commandPrompt": "Only reply the result and nothing else. Please edit the following sentences in English to improve clarity, conciseness, and coherence, making them match the expression of native speakers.:\n\nThis are a test.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are an expert translator, translate directly without explanation.\n\nOnly reply the result and nothing else. Please edit the following sentences in English to improve clarity, conciseness, and coherence, making them match the expression of native speakers.:\n\nThis are a test."
+      }
+    ]
+  },
+  {
+    "name": "Summarize",
+    "query": {
+      "Text": "One paragraph. Another paragraph.",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "summarize",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional text summarizer, you can only summarize the text, don't interpret it.",
+      "commandPrompt": "Only reply the result and nothing else. Please summarize this text in the most concise language and must use 简体中文 language!:\n\nOne paragraph. Another paragraph.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional text summarizer, you can only summarize the text, don't interpret it.\n\nOnly reply the result and nothing else. Please summarize this text in the most concise language and must use 简体中文 language!:\n\nOne paragraph. Another paragraph."
+      }
+    ]
+  },
+  {
+    "name": "Analyze",
+    "query": {
+      "Text": "This is a test.",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "analyze",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translation engine and grammar analyzer.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate this text to 简体中文 and explain the grammar in the original text using 简体中文.:\n\nThis is a test.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translation engine and grammar analyzer.\n\nOnly reply the result and nothing else. Please translate this text to 简体中文 and explain the grammar in the original text using 简体中文.:\n\nThis is a test."
+      }
+    ]
+  },
+  {
+    "name": "Code",
+    "query": {
+      "Text": "const x = 1\n",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "explain-code",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a code explanation engine that can only explain code but not interpret or translate it. Also, please report bugs and errors (if any).",
+      "commandPrompt": "Only reply the result and nothing else. explain the provided code, regex or script in the most concise language and must use 简体中文 language! You may use Markdown. If the content is not code, return an error message. If the code has obvious errors, point them out.:\n\n```\nconst x = 1\n\n```",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a code explanation engine that can only explain code but not interpret or translate it. Also, please report bugs and errors (if any).\n\nOnly reply the result and nothing else. explain the provided code, regex or script in the most concise language and must use 简体中文 language! You may use Markdown. If the content is not code, return an error message. If the code has obvious errors, point them out.:\n\n```\nconst x = 1\n\n```"
+      }
+    ]
+  },
+  {
+    "name": "Story",
+    "query": {
+      "Text": "apple, river, cloud",
+      "Target": "",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "a science fiction story",
+      "Action": {
+        "mode": "big-bang",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional writer and you will write a science fiction story based on the given words",
+      "commandPrompt": "Only reply the result and nothing else. Write a science fiction story of no more than 160 words. The article must contain the words in the following text. The more words you use, the better:\n\napple, river, cloud",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional writer and you will write a science fiction story based on the given words\n\nOnly reply the result and nothing else. Write a science fiction story of no more than 160 words. The article must contain the words in the following text. The more words you use, the better:\n\napple, river, cloud"
+      }
+    ]
+  },
+  {
+    "name": "Custom",
+    "query": {
+      "Text": "Hello",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "",
+        "prompt": "Translate from ${sourceLang} to ${targetLang}",
+        "commandPrompt": "Be concise.",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "Translate from English to 简体中文",
+      "commandPrompt": "Only reply the result and nothing else. Be concise.:\n\nHello",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Translate from English to 简体中文\n\nOnly reply the result and nothing else. Be concise.:\n\nHello"
+      }
+    ]
+  },
+  {
+    "name": "Custom embeds text",
+    "query": {
+      "Text": "Hello",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "",
+        "prompt": "Explain ${text}",
+        "commandPrompt": "Use ${targetLang}",
+        "format": "markdown"
+      }
+    },
+    "expected": {
+      "rolePrompt": "Explain Hello",
+      "commandPrompt": "(Requirements: The output format must be markdown) Use 简体中文",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain Hello\n\n(Requirements: The output format must be markdown) Use 简体中文"
+      }
+    ]
+  },
+  {
+    "name": "Custom text in command",
+    "query": {
+      "Text": "Hello",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "",
+        "prompt": "",
+        "commandPrompt": "Explain ${text}",
+        "format": "text"
+      }
+    },
+    "expected": {
+      "rolePrompt": "",
+      "commandPrompt": "(Requirements: The output format must be text) Explain Hello",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "(Requirements: The output format must be text) Explain Hello"
+      }
+    ]
+  },
+  {
+    "name": "Custom repeated substitution",
+    "query": {
+      "Text": "Hello",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "",
+        "prompt": "${targetLang} ${targetLang} ${text} ${text}",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "简体中文 ${targetLang} Hello ${text}",
+      "commandPrompt": "",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "简体中文 ${targetLang} Hello ${text}\n\n"
+      }
+    ]
+  },
+  {
+    "name": "Auto Chinese",
+    "query": {
+      "Text": "你好",
+      "Source": "自动检测",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional 简体中文-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, bilingual  sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <translated meaning> /  <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>",
+      "commandPrompt": "Only reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: 你好",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional 简体中文-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, bilingual  sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <translated meaning> /  <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>\n\nOnly reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: 你好"
+      }
+    ]
+  },
+  {
+    "name": "Auto English",
+    "query": {
+      "Text": "Hello, world!",
+      "Source": "自动检测",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 简体中文:\n\nHello, world!",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to 简体中文:\n\nHello, world!"
+      }
+    ]
+  },
+  {
+    "name": "Auto traditional Chinese",
+    "query": {
+      "Text": "這是一個測試。",
+      "Source": "自动检测",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\n這是一個測試。",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\n這是一個測試。"
+      }
+    ]
+  },
+  {
+    "name": "Auto Japanese",
+    "query": {
+      "Text": "日本語のテストです。",
+      "Source": "自动检测",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 简体中文:\n\n日本語のテストです。",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to 简体中文:\n\n日本語のテストです。"
+      }
+    ]
+  },
+  {
+    "name": "Auto Vietnamese",
+    "query": {
+      "Text": "Đây là một bài kiểm tra tiếng Việt.",
+      "Source": "自动检测",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\nĐây là một bài kiểm tra tiếng Việt.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\nĐây là một bài kiểm tra tiếng Việt."
+      }
+    ]
+  },
+  {
+    "name": "Auto Korean",
+    "query": {
+      "Text": "안녕하세요",
+      "Source": "自动检测",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional Korean-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, bilingual  sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <translated meaning> /  <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>",
+      "commandPrompt": "Only reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: 안녕하세요",
+      "wordMode": true
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translation engine. Please translate the text into English without explanation. When the text has only one word, please act as a professional Korean-English dictionary, and list the original form of the word (if any), the language of the word, the corresponding phonetic notation or transcription,  all senses with parts of speech, bilingual  sentence examples (at least 3) and etymology. If you think there is a spelling mistake, please tell me the most possible correct word otherwise reply in the following format:\n<word> (<original form>)\n[<language>]· / <IPA>\n[<part of speech>] <translated meaning> /  <meaning in source language>\nExamples:\n<index>. <sentence>(<sentence translation>)\nEtymology:\n<etymology>\n\nOnly reply the result and nothing else. I understand. Please give me the word.:\n\nThe word is: 안녕하세요"
+      }
+    ]
+  },
+  {
+    "name": "Auto Russian",
+    "query": {
+      "Text": "Привет, мир!",
+      "Source": "自动检测",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\nПривет, мир!",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\nПривет, мир!"
+      }
+    ]
+  },
+  {
+    "name": "Auto Spanish",
+    "query": {
+      "Text": "El niño está aquí.",
+      "Source": "自动检测",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\nEl niño está aquí.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\nEl niño está aquí."
+      }
+    ]
+  },
+  {
+    "name": "Auto French",
+    "query": {
+      "Text": "Où est la bibliothèque?",
+      "Source": "自动检测",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\nOù est la bibliothèque?",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\nOù est la bibliothèque?"
+      }
+    ]
+  },
+  {
+    "name": "Auto German",
+    "query": {
+      "Text": "Schöne Grüße!",
+      "Source": "自动检测",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\nSchöne Grüße!",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\nSchöne Grüße!"
+      }
+    ]
+  },
+  {
+    "name": "Auto Thai",
+    "query": {
+      "Text": "สวัสดีครับ",
+      "Source": "自动检测",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\nสวัสดีครับ",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\nสวัสดีครับ"
+      }
+    ]
+  },
+  {
+    "name": "Language en",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "en",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to English:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to English:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language en-US",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "en-US",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to American English:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to American English:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language en-GB",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "en-GB",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to British English:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to British English:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language en-CA",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "en-CA",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Canadian English:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Canadian English:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language en-AU",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "en-AU",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Australian English:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Australian English:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language zh-Hans",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "zh-Hans",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 简体中文:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to 简体中文:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language zh-Hant",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "zh-Hant",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 繁體中文:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to 繁體中文:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language yue",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "yue",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 粤语:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to 粤语:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language lzh",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "lzh",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 古文:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to 古文:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language jdbhw",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "jdbhw",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "您是一位在中文系研究中文的资深学者",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 近代白话文:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "您是一位在中文系研究中文的资深学者\n\nOnly reply the result and nothing else. Please translate to 近代白话文:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language xdbhw",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "xdbhw",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "您是一位在中文系研究中文的资深学者",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 现代白话文:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "您是一位在中文系研究中文的资深学者\n\nOnly reply the result and nothing else. Please translate to 现代白话文:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ja",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ja",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 日本語:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to 日本語:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ko",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ko",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to 한국어:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to 한국어:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ko-banmal",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ko-banmal",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Translate from English to Korean banmal. Please use 이다 and 다 endings. Never use formal or honorific endings. Return translated text only.:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Translate from English to Korean banmal. Please use 이다 and 다 endings. Never use formal or honorific endings. Return translated text only.:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language fr",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "fr",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Français:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Français:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language de",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "de",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Deutsch:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Deutsch:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language es",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "es",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Español:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Español:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language it",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "it",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Italiano:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Italiano:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ru",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ru",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Русский:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Русский:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language pt",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "pt",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Português:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Português:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language nl",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "nl",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Nederlands:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Nederlands:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language pl",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "pl",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Polski:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Polski:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ar",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ar",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to العربية:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to العربية:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language af",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "af",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Afrikaans:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Afrikaans:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language am",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "am",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to አማርኛ:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to አማርኛ:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language az",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "az",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Azərbaycan:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Azərbaycan:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language be",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "be",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Беларуская:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Беларуская:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language bg",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "bg",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Български:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Български:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language bn",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "bn",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to বাংলা:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to বাংলা:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language bs",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "bs",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Bosanski:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Bosanski:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ca",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ca",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Català:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Català:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ceb",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ceb",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Cebuano:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Cebuano:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language co",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "co",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Corsu:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Corsu:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language cs",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "cs",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Čeština:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Čeština:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language cy",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "cy",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Cymraeg:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Cymraeg:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language da",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "da",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Dansk:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Dansk:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language el",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "el",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Ελληνικά:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Ελληνικά:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language eo",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "eo",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Esperanto:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Esperanto:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language et",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "et",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Eesti:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Eesti:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language eu",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "eu",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Euskara:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Euskara:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language fa",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "fa",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to فارسی:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to فارسی:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language fi",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "fi",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Suomi:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Suomi:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language fj",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "fj",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Fijian:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Fijian:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language fy",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "fy",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Frysk:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Frysk:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ga",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ga",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Gaeilge:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Gaeilge:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language gd",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "gd",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Gàidhlig:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Gàidhlig:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language gl",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "gl",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Galego:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Galego:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language gu",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "gu",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to ગુજરાતી:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to ગુજરાતી:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ha",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ha",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Hausa:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Hausa:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language haw",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "haw",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Hawaiʻi:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Hawaiʻi:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language he",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "he",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to עברית:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to עברית:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language hi",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "hi",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to हिन्दी:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to हिन्दी:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language hmn",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "hmn",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Hmong:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Hmong:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language hr",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "hr",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Hrvatski:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Hrvatski:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ht",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ht",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Kreyòl Ayisyen:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Kreyòl Ayisyen:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language hu",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "hu",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Magyar:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Magyar:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language hy",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "hy",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Հայերեն:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Հայերեն:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language id",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "id",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Bahasa Indonesia:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Bahasa Indonesia:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ig",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ig",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Igbo:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Igbo:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language is",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "is",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Íslenska:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Íslenska:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language jw",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "jw",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Jawa:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Jawa:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ka",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ka",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to ქართული:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to ქართული:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language kk",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "kk",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Қазақ:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Қазақ:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language mn",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "mn",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Монгол хэл:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Монгол хэл:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language tr",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "tr",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Türkçe:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Türkçe:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ug",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ug",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to ئۇيغۇر تىلى:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to ئۇيغۇر تىلى:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language uk",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "uk",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Українська:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Українська:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language ur",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "ur",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to اردو:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to اردو:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language vi",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "vi",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Tiếng Việt:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Tiếng Việt:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language sv",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "sv",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to Svenska:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to Svenska:\n\nA full sentence for translation."
+      }
+    ]
+  },
+  {
+    "name": "Language th",
+    "query": {
+      "Text": "A full sentence for translation.",
+      "Source": "en",
+      "Target": "th",
+      "Writing": false,
+      "SelectedWord": "",
+      "ArticlePrompt": "",
+      "Action": {
+        "mode": "translate",
+        "prompt": "",
+        "commandPrompt": "",
+        "format": ""
+      }
+    },
+    "expected": {
+      "rolePrompt": "You are a professional translator.",
+      "commandPrompt": "Only reply the result and nothing else. Please translate to ไทย:\n\nA full sentence for translation.",
+      "wordMode": false
+    },
+    "messages": [
+      {
+        "role": "user",
+        "content": "You are a professional translator.\n\nOnly reply the result and nothing else. Please translate to ไทย:\n\nA full sentence for translation."
+      }
+    ]
+  }
+]
