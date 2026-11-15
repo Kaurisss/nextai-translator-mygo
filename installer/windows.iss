@@ -1,5 +1,5 @@
 #ifndef AppVersion
-  #define AppVersion "0.0.1"
+  #define AppVersion "0.1.0"
 #endif
 #ifndef SourceDir
   #define SourceDir "..\build\settings\windows-amd64"
