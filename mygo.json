@@ -2,7 +2,7 @@
     "name": "NextAI Translator Native",
     "slug": "nextai-translator-native",
     "identifier": "xyz.nextai.translator.native",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "license": "AGPL-3.0",
     "icon": "resources/icon.png",
     "out": "build"
