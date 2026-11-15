@@ -2,7 +2,10 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"image/png"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -293,6 +296,63 @@ func TestTranslateFromUIAndRestoreHistory(t *testing.T) {
 	click(t, tt, "打开")
 	if a.page != "translator" || a.text != "Hello" || a.result != "你好" {
 		t.Fatal("history not restored")
+	}
+}
+
+func TestTranslationShowsPartialResponseBeforeStreamEnds(t *testing.T) {
+	const first = "第一段译文到了，后面的正文仍会继续返回，连接不会立即关闭。"
+	release := make(chan struct{})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		fmt.Fprintf(w, "data: {\"choices\":[{\"delta\":{\"content\":%q}}]}\n\n", first)
+		if err := http.NewResponseController(w).Flush(); err != nil {
+			t.Error(err)
+			return
+		}
+		select {
+		case <-release:
+		case <-r.Context().Done():
+			return
+		}
+		fmt.Fprint(w, "data: {\"choices\":[{\"delta\":{\"content\":\"\\n第二段译文\"}}]}\n\ndata: [DONE]\n\n")
+	}))
+	defer server.Close()
+
+	a := testApp(t)
+	a.Data.Settings.Provider = "LiteLLM"
+	a.Data.Settings.Profiles["LiteLLM"] = core.Profile{Provider: "LiteLLM", Model: "test", Endpoint: server.URL}
+	a.text = "Translate these two lines."
+	queue := make(chan func(), 8)
+	a.post = func(fn func()) { queue <- fn }
+	tt := ui.NewTester(a.View, 560, 880)
+	click(t, tt, "提交")
+	defer a.stop()
+	applyUpdate := func() {
+		t.Helper()
+		select {
+		case fn := <-queue:
+			fn()
+		case <-time.After(3 * time.Second):
+			t.Fatal("timed out waiting for a translation update")
+		}
+		tt.Frame()
+	}
+	applyUpdate()
+	tt.Advance(40 * time.Millisecond)
+	if !a.busy || !tt.HasText("第一") || tt.HasText(first) || len(a.Data.History) != 0 {
+		t.Fatalf("partial response missing before EOF: busy=%v error=%q texts=%v", a.busy, a.failure, tt.Texts())
+	}
+	tt.Advance(time.Second)
+	if !tt.HasText(first) {
+		t.Fatalf("first burst did not finish rendering before EOF: %v", tt.Texts())
+	}
+	close(release)
+	for a.busy {
+		applyUpdate()
+	}
+	tt.Advance(time.Second)
+	if a.failure != "" || !tt.HasText(first+"\n第二段译文") || len(a.Data.History) != 1 {
+		t.Fatalf("final response missing: error=%q texts=%v", a.failure, tt.Texts())
 	}
 }
 

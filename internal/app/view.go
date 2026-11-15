@@ -2,11 +2,13 @@ package app
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 	"time"
 	"unicode/utf8"
 
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
+	"github.com/Kaurisss/nextai-translator-mygo/internal/desktop"
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 	"github.com/egoist/mygo/ui/markdown"
@@ -92,8 +94,12 @@ func (a *App) View(c *ui.Context) {
 		if a.Data.Settings.Appearance == "深色" {
 			source = mygo.ThemeDark
 		}
-		a.Window.SetWindowButtonsTheme(source)
 		a.appliedAppearance = a.Data.Settings.Appearance
+		if runtime.GOOS == "windows" && desktop.SupportsBackgroundBlur() {
+			mygo.Theme.SetSource(source)
+		} else {
+			a.Window.SetWindowButtonsTheme(source)
+		}
 	}
 }
 

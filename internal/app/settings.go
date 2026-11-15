@@ -262,7 +262,11 @@ func (a *App) generalSettings(c *ui.Context) {
 		return input
 	})
 	if desktop.SupportsBackgroundBlur() {
-		ui.Checkbox(c, &s.BackgroundBlur, a.tr("窗口背景模糊")).Label(a.tr("窗口背景模糊"))
+		label := a.tr("窗口背景模糊")
+		if runtime.GOOS == "windows" {
+			label += " (Mica)"
+		}
+		ui.Checkbox(c, &s.BackgroundBlur, label).Label(label)
 	}
 	ui.Checkbox(c, &s.AutoHideOnBlur, a.tr("失去焦点时自动隐藏窗口")).Label(a.tr("失去焦点时自动隐藏窗口"))
 	ui.Checkbox(c, &s.FixedPosition, a.tr("固定位置")).Label(a.tr("固定位置"))

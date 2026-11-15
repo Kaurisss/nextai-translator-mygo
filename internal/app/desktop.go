@@ -27,12 +27,9 @@ func (a *App) Open(icon []byte) {
 	options := mygo.WindowOptions{Title: "NextAI Translator", Width: 560, Height: 900, MinWidth: 500, MinHeight: 560, StateKey: "translator-stacked", TitleBarStyle: mygo.TitleBarHidden, TitleBarHeight: 32, AutoHideMenuBar: true, Hidden: startedAtLogin, Content: ui.View(a.View)}
 	if desktop.SupportsBackgroundBlur() {
 		options.Transparent = true
-		options.Vibrancy = mygo.VibrancyAcrylic
+		options.Vibrancy = backgroundVibrancy(a.Data.Settings.BackgroundBlur)
 	}
 	a.Window = mygo.NewWindow(options)
-	if options.Vibrancy != mygo.VibrancyNone && !a.Data.Settings.BackgroundBlur {
-		a.Window.SetVibrancy(mygo.VibrancyNone)
-	}
 	if err := a.Window.SetIcon(icon); err != nil {
 		a.failure = "设置窗口图标: " + err.Error()
 	}
@@ -92,6 +89,16 @@ func (a *App) Open(icon []byte) {
 			a.failure = "启用划词: " + err.Error()
 		}
 	}
+}
+
+func backgroundVibrancy(enabled bool) mygo.Vibrancy {
+	if !enabled {
+		return mygo.VibrancyNone
+	}
+	if runtime.GOOS == "windows" {
+		return mygo.VibrancyMica
+	}
+	return mygo.VibrancyAcrylic
 }
 
 func (a *App) openSettings() {
@@ -274,11 +281,7 @@ func (a *App) saveSettings() {
 				a.selectionIcon.Hide()
 			}
 			if a.Window != nil && desktop.SupportsBackgroundBlur() {
-				material := mygo.VibrancyNone
-				if settings.BackgroundBlur {
-					material = mygo.VibrancyAcrylic
-				}
-				a.Window.SetVibrancy(material)
+				a.Window.SetVibrancy(backgroundVibrancy(settings.BackgroundBlur))
 			}
 			if settings.UILanguage != "" {
 				mygo.App.SetLocale(settings.UILanguage)

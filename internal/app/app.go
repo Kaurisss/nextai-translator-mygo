@@ -110,7 +110,7 @@ func New(d core.Data, s core.Store) *App {
 	}
 	a.profile = d.Settings.Profiles[d.Settings.Provider]
 	a.credentials = mygo.Secrets.Service("xyz.nextai.translator.native")
-	a.md.Reveal = &markdown.Reveal{Unit: markdown.AtOnce, Fade: -1}
+	a.md.Reveal = &markdown.Reveal{Unit: markdown.ByWord, Fade: -1}
 	a.editAction = d.Actions[0]
 	a.actionID = d.Actions[0].Name
 	return a
