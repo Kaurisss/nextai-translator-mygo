@@ -8,16 +8,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/egoist/mygo"
-	"github.com/egoist/mygo/ui"
-	"github.com/egoist/mygo/ui/markdown"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/desktop"
 	"github.com/Kaurisss/nextai-translator-mygo/resources"
+	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/ui"
+	"github.com/egoist/mygo/ui/markdown"
 )
 
 type Streamer interface {
 	Stream(context.Context, core.Query, func(string)) error
+}
+
+type loginItem interface {
+	OpenAtLogin() bool
+	SetOpenAtLogin(bool) error
 }
 
 type App struct {
@@ -30,6 +35,8 @@ type App struct {
 	apiKey                                              string
 	keys                                                map[string]string
 	credentials                                         credentialStore
+	login                                               loginItem
+	startAtLogin, savedStartAtLogin                     bool
 	keyLoaded                                           map[string]bool
 	keyLoading                                          map[string]bool
 	busy, speaking, systemBusy, pinned                  bool
@@ -50,6 +57,7 @@ type App struct {
 	favoritesOnly                                       bool
 	advancedAction                                      bool
 	appliedAppearance                                   string
+	latestVersion                                       string
 	settingsDraft                                       core.Settings
 	settingsTab                                         int
 	client                                              *http.Client
@@ -68,6 +76,14 @@ type App struct {
 	selectionSpeechGeneration                           uint64
 	writing                                             bool
 	quickWindow                                         *mygo.Window
+	inlineWindow                                        *mygo.Window
+	inlineGeneration                                    uint64
+	selectionIcon                                       *mygo.Window
+	stopSelectionWatch                                  func()
+	selectionGeneration                                 uint64
+	selectionWatchGeneration                            uint64
+	selectedText                                        string
+	selectedWindow                                      uintptr
 	showAPIKey, showProxyPassword                       bool
 	speechStatus                                        string
 }
@@ -78,7 +94,7 @@ func New(d core.Data, s core.Store) *App {
 	}
 	d.Settings.Target = d.Settings.DefaultTarget
 	client, clientErr := core.HTTPClient(d.Settings.Proxy, "")
-	a := &App{Data: d, Store: s, Engine: core.Engine{Client: client}, client: client, settingsDraft: d.Settings.Clone(), page: "translator", action: d.Actions[0].Name, editorPercent: 40, keys: map[string]string{}, keyLoaded: map[string]bool{}, keyLoading: map[string]bool{}, pendingKeys: map[string]string{}, modelOptions: map[string][]string{}, modelFetched: map[string]bool{}, registered: map[string]string{}, voiceLanguage: "English"}
+	a := &App{Data: d, Store: s, Engine: core.Engine{Client: client}, client: client, login: mygo.App, settingsDraft: d.Settings.Clone(), page: "translator", action: d.Actions[0].Name, editorPercent: 40, keys: map[string]string{}, keyLoaded: map[string]bool{}, keyLoading: map[string]bool{}, pendingKeys: map[string]string{}, modelOptions: map[string][]string{}, modelFetched: map[string]bool{}, registered: map[string]string{}, voiceLanguage: "English"}
 	if clientErr != nil {
 		a.failure = clientErr.Error()
 	}
@@ -105,6 +121,9 @@ func (a *App) update(fn func()) {
 		fn()
 		if a.quickWindow != nil {
 			a.quickWindow.Update(func() {})
+		}
+		if a.inlineWindow != nil {
+			a.inlineWindow.Update(func() {})
 		}
 	})
 }
@@ -150,6 +169,9 @@ func (a *App) loadKey(provider string) {
 				}
 				a.client = client
 				a.Engine = core.Engine{Client: client}
+				if a.Data.Settings.AutoCheckUpdates {
+					a.checkForUpdates()
+				}
 			}
 			if a.profile.Provider == provider {
 				a.apiKey = string(b)
@@ -166,6 +188,7 @@ func (a *App) start() {
 	if a.busy || a.systemBusy {
 		return
 	}
+	a.hideInlineLookup()
 	if a.client == nil {
 		a.failure = "请先修正并保存代理设置"
 		return
@@ -206,7 +229,7 @@ func (a *App) start() {
 	if action.Model != "" {
 		profile.Model = action.Model
 	}
-	q := core.Query{Profile: profile, Key: a.keys[provider], Text: a.text, Source: a.Data.Settings.Source, Target: a.Data.Settings.Target, Action: action}
+	q := core.Query{Profile: profile, Key: a.keys[provider], Text: a.text, Source: a.Data.Settings.Source, Target: a.Data.Settings.Target, Action: action, LanguageDetection: a.Data.Settings.LanguageDetection}
 	writing, targetWindow, newline := a.writing, a.previousWindow, a.Data.Settings.Writing.NewlineShortcut
 	if writing {
 		q.Writing = true
@@ -265,6 +288,7 @@ func (a *App) start() {
 }
 
 func (a *App) stop() {
+	a.hideInlineLookup()
 	if a.cancel != nil {
 		a.cancel()
 		a.cancel = nil

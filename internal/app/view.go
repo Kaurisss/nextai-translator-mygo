@@ -16,6 +16,10 @@ func (a *App) View(c *ui.Context) {
 	a.applyTheme(c)
 	t := c.Theme()
 	root := ui.Column(c).Fill().Background(t.Background)
+	if a.Data.Settings.BackgroundBlur && c.Vibrancy() {
+		c.Root().Background(ui.Transparent)
+		root.Background(ui.Transparent)
+	}
 	if !a.busy && !a.systemBusy {
 		if files := root.DroppedFiles(); len(files) > 0 {
 			a.dropImage(files)
@@ -28,7 +32,7 @@ func (a *App) View(c *ui.Context) {
 		bar := c.TitleBar()
 		ui.Row(c).Height(max(bar.Height, t.Space(8))).Padding(0, bar.Right+t.Space(3), 0, bar.Left+t.Space(3)).Gap(t.Space(2)).AlignItems(ui.Center).DragWindow().Children(func() {
 			ui.Image(c, a.logo).Size(t.Space(4), t.Space(4)).Radius(t.Space(1))
-			ui.Text(c, "NextAI Translator").FontSize(12).SingleLine()
+			ui.Text(c, "NextAI Translator").FontSize(max(12, t.Rem(12.0/14))).SingleLine()
 			ui.Spacer(c)
 		})
 		c.Key(a.page)
@@ -75,8 +79,7 @@ func (a *App) View(c *ui.Context) {
 		}
 	}
 	if shortcutsEnabled && c.Shortcut(ui.Cmd, ui.KeyComma) {
-		a.page = "settings"
-		a.maybeRefreshModels()
+		a.openSettings()
 	}
 	if shortcutsEnabled && c.Shortcut(ui.Cmd|ui.Shift, ui.KeyEnter) && a.result != "" && a.previousWindow != 0 {
 		a.insert()
@@ -102,6 +105,9 @@ func (a *App) applyTheme(c *ui.Context) {
 		c.SetTheme(ui.DarkTheme())
 	}
 	theme := *c.Theme()
+	if a.Data.Settings.UIFontSize > 0 {
+		theme.FontSize = float32(a.Data.Settings.UIFontSize)
+	}
 	theme.Accent, theme.AccentText, theme.Focus = theme.Text, theme.Background, theme.Text
 	theme.AccentHover, theme.AccentPressed = theme.TextMuted, theme.Text
 	c.SetTheme(&theme)
@@ -142,6 +148,9 @@ func (a *App) translator(c *ui.Context) {
 					}
 					return false
 				})
+				if a.Data.Settings.FontSize > 0 {
+					editor.FontSize(float32(a.Data.Settings.FontSize))
+				}
 				if a.Data.Settings.Speech.ReadSelection {
 					start, end := editor.TextSelection()
 					if start > end {
@@ -165,9 +174,9 @@ func (a *App) translator(c *ui.Context) {
 				}
 				if strings.TrimSpace(a.text) != "" || a.busy {
 					ui.Row(c).Gap(t.Space(2)).AlignItems(ui.Center).Children(func() {
-						ui.Text(c, fmt.Sprint(utf8.RuneCountInString(a.text))).FontSize(12).TextColor(t.TextMuted)
+						ui.Text(c, fmt.Sprint(utf8.RuneCountInString(a.text))).FontSize(max(12, t.Rem(12.0/14))).TextColor(t.TextMuted)
 						ui.Spacer(c)
-						ui.Text(c, a.tr("Enter 提交，Shift+Enter 换行")).FontSize(12).TextColor(t.TextMuted).SingleLine()
+						ui.Text(c, a.tr("Enter 提交，Shift+Enter 换行")).FontSize(max(12, t.Rem(12.0/14))).TextColor(t.TextMuted).SingleLine()
 						label, name := "提交", "submit"
 						if a.busy {
 							label, name = "停止", "stop"
@@ -191,6 +200,7 @@ func (a *App) translator(c *ui.Context) {
 					}
 					ui.Spacer(c)
 					if a.text != "" && iconButton(c, "clear", a.tr("清空")).Disabled(a.busy).Clicked() {
+						a.hideInlineLookup()
 						a.text = ""
 						a.result = ""
 						a.notice = ""
@@ -202,10 +212,14 @@ func (a *App) translator(c *ui.Context) {
 			})
 		}
 		output := func() {
+			a.md.Theme = &markdown.Theme{FontSize: float32(a.Data.Settings.FontSize)}
 			ui.Column(c).Fill().Gap(t.Space(2)).Padding(t.Space(3), 0, 0, 0).Children(func() {
 				ui.Scroll(c).Grow(1).WidthPercent(100).Label(a.tr("翻译结果")).Busy(a.busy).Children(func() {
 					if a.resultFormat == "纯文本" {
-						ui.TextArea(c, &a.result).ReadOnly(true).Label(a.tr("纯文本结果")).WidthPercent(100).Lines(12, 32)
+						result := ui.TextArea(c, &a.result).ReadOnly(true).Label(a.tr("纯文本结果")).WidthPercent(100).Lines(12, 32)
+						if a.Data.Settings.FontSize > 0 {
+							result.FontSize(float32(a.Data.Settings.FontSize))
+						}
 					} else if a.busy {
 						markdown.Stream(c, markdownHardBreaks(a.result), &a.md)
 					} else {
@@ -332,11 +346,13 @@ func (a *App) footer(c *ui.Context) {
 			if a.page == "settings" {
 				a.page = "translator"
 			} else {
-				a.page = "settings"
-				a.maybeRefreshModels()
+				a.openSettings()
 			}
 		}
-		ui.Text(c, profile.Provider+"  "+profile.Model).FontSize(12).TextColor(t.TextMuted).SingleLine().Grow(1)
+		ui.Text(c, profile.Provider+"  "+profile.Model).FontSize(max(12, t.Rem(12.0/14))).TextColor(t.TextMuted).SingleLine().Grow(1)
+		if a.latestVersion != "" {
+			ui.Link(c, a.tr("有新版本可用！")+" "+a.latestVersion, "https://github.com/Kaurisss/nextai-translator-mygo/releases/latest").SingleLine()
+		}
 		if iconButton(c, "history", a.tr("历史记录")).Clicked() {
 			if a.page == "history" {
 				a.page = "translator"

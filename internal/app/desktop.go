@@ -21,7 +21,18 @@ import (
 )
 
 func (a *App) Open(icon []byte) {
-	a.Window = mygo.NewWindow(mygo.WindowOptions{Title: "NextAI Translator", Width: 560, Height: 900, MinWidth: 500, MinHeight: 560, StateKey: "translator-stacked", TitleBarStyle: mygo.TitleBarHidden, TitleBarHeight: 32, AutoHideMenuBar: true, Content: ui.View(a.View)})
+	a.startAtLogin = a.login.OpenAtLogin()
+	a.savedStartAtLogin = a.startAtLogin
+	startedAtLogin := mygo.App.WasOpenedAtLogin()
+	options := mygo.WindowOptions{Title: "NextAI Translator", Width: 560, Height: 900, MinWidth: 500, MinHeight: 560, StateKey: "translator-stacked", TitleBarStyle: mygo.TitleBarHidden, TitleBarHeight: 32, AutoHideMenuBar: true, Hidden: startedAtLogin, Content: ui.View(a.View)}
+	if desktop.SupportsBackgroundBlur() {
+		options.Transparent = true
+		options.Vibrancy = mygo.VibrancyAcrylic
+	}
+	a.Window = mygo.NewWindow(options)
+	if options.Vibrancy != mygo.VibrancyNone && !a.Data.Settings.BackgroundBlur {
+		a.Window.SetVibrancy(mygo.VibrancyNone)
+	}
 	if err := a.Window.SetIcon(icon); err != nil {
 		a.failure = "设置窗口图标: " + err.Error()
 	}
@@ -31,11 +42,16 @@ func (a *App) Open(icon []byte) {
 		a.failure = err.Error()
 	}
 	a.loadKey("proxy-password")
-	a.Window.OnClosed(func() { a.stop(); a.stopSpeaking(); mygo.GlobalShortcut.UnregisterAll() })
+	a.Window.OnClosed(func() { a.stop(); a.stopSpeaking(); a.setSelectionWatch(false); mygo.GlobalShortcut.UnregisterAll() })
 	mygo.App.OnBeforeQuit(func(*mygo.QuitEvent) { a.quitting = true })
 	a.Window.OnClose(func(e *mygo.CloseEvent) {
 		if a.tray != nil && !a.quitting {
 			e.PreventDefault()
+			a.Window.Hide()
+		}
+	})
+	a.Window.OnBlur(func() {
+		if a.Data.Settings.AutoHideOnBlur && a.page == "translator" && !a.pinned && !a.systemBusy && a.tray != nil {
 			a.Window.Hide()
 		}
 	})
@@ -47,15 +63,19 @@ func (a *App) Open(icon []byte) {
 	})
 	mygo.App.OnSecondInstance(func([]string, string) { a.Window.Show(); a.Window.Focus() })
 	trayMenu := a.newTrayMenu()
-	options := mygo.TrayOptions{Icon: icon, ToolTip: "NextAI Translator"}
+	trayOptions := mygo.TrayOptions{Icon: icon, ToolTip: "NextAI Translator"}
 	if runtime.GOOS == "linux" {
-		options.Menu = trayMenu
+		trayOptions.Menu = trayMenu
 	}
-	tray, err := mygo.NewTray(options)
+	tray, err := mygo.NewTray(trayOptions)
 	if err != nil {
 		a.failure = "创建托盘: " + err.Error()
+		if startedAtLogin {
+			a.Window.Show()
+		}
 	} else {
 		a.tray = tray
+		a.applyTaskbarIcon(a.Data.Settings.HideTaskbarIcon)
 		tray.OnClick(func() { a.Window.Show(); a.Window.Focus() })
 		if runtime.GOOS != "linux" {
 			tray.OnRightClick(func() {
@@ -63,7 +83,54 @@ func (a *App) Open(icon []byte) {
 				tray.PopUpMenu()
 				tray.SetMenu(nil)
 			})
+		} else {
+			a.refreshTray()
 		}
+	}
+	if a.Data.Settings.ShowSelectionIcon || a.Data.Settings.AutoTranslate {
+		if err := a.setSelectionWatch(true); err != nil {
+			a.failure = "启用划词: " + err.Error()
+		}
+	}
+}
+
+func (a *App) openSettings() {
+	if a.startAtLogin == a.savedStartAtLogin {
+		a.startAtLogin = a.login.OpenAtLogin()
+		a.savedStartAtLogin = a.startAtLogin
+	}
+	a.page = "settings"
+	a.maybeRefreshModels()
+}
+
+func (a *App) applyTaskbarIcon(hidden bool) {
+	if runtime.GOOS == "darwin" {
+		if hidden {
+			mygo.App.Dock.Hide()
+		} else {
+			mygo.App.Dock.Show()
+		}
+	} else {
+		a.Window.SetSkipTaskbar(hidden)
+	}
+}
+
+func (a *App) showAtPointer() {
+	if !a.Data.Settings.FixedPosition && !a.Window.IsMaximized() && !a.Window.IsFullScreen() {
+		point := mygo.Screen.CursorScreenPoint()
+		area := mygo.Screen.DisplayNearestPoint(point).WorkArea
+		width, height := a.Window.Size()
+		position := positionNearPointer(point, area, width, height)
+		a.Window.SetPosition(position.X, position.Y)
+	}
+	a.Window.Show()
+	a.Window.Focus()
+}
+
+func positionNearPointer(point mygo.Point, area mygo.Rectangle, width, height int) mygo.Point {
+	return mygo.Point{
+		X: max(area.X, min(point.X, area.X+area.Width-width)),
+		Y: max(area.Y, min(point.Y, area.Y+area.Height-height)),
 	}
 }
 
@@ -72,7 +139,7 @@ func (a *App) Menu() *mygo.Menu {
 }
 
 func (a *App) newTrayMenu() *mygo.Menu {
-	return mygo.NewMenu([]*mygo.MenuItem{
+	items := []*mygo.MenuItem{
 		{Label: a.tr("打开翻译"), Click: func(*mygo.MenuItem, *mygo.Window) { a.Window.Show(); a.Window.Focus() }},
 		{Label: a.tr("翻译剪贴板"), Click: func(*mygo.MenuItem, *mygo.Window) {
 			a.text = mygo.Clipboard.ReadText()
@@ -81,8 +148,24 @@ func (a *App) newTrayMenu() *mygo.Menu {
 			a.Window.Focus()
 			a.start()
 		}},
-		mygo.Separator(), {Role: mygo.RoleQuit},
-	})
+	}
+	if a.latestVersion != "" {
+		items = append(items, &mygo.MenuItem{Label: a.tr("有新版本可用！") + " " + a.latestVersion, Click: func(*mygo.MenuItem, *mygo.Window) {
+			go func() {
+				if err := mygo.Shell.OpenExternal("https://github.com/Kaurisss/nextai-translator-mygo/releases/latest"); err != nil {
+					a.update(func() { a.failure = err.Error(); a.Window.Show() })
+				}
+			}()
+		}})
+	}
+	items = append(items, mygo.Separator(), &mygo.MenuItem{Role: mygo.RoleQuit})
+	return mygo.NewMenu(items)
+}
+
+func (a *App) refreshTray() {
+	if runtime.GOOS == "linux" && a.tray != nil {
+		a.tray.SetMenu(a.newTrayMenu())
+	}
 }
 
 func (a *App) saveSettings() {
@@ -101,6 +184,10 @@ func (a *App) saveSettings() {
 		a.failure = err.Error()
 		return
 	}
+	if settings.HideTaskbarIcon && a.Window != nil && a.tray == nil {
+		a.failure = "系统托盘不可用，无法隐藏任务栏图标"
+		return
+	}
 	client, err := core.HTTPClient(settings.Proxy, a.proxyPassword)
 	if err != nil {
 		a.failure = err.Error()
@@ -111,6 +198,8 @@ func (a *App) saveSettings() {
 		return
 	}
 	a.pendingKeys[a.profile.Provider] = a.apiKey
+	startAtLogin := a.startAtLogin
+	startAtLoginEdited := startAtLogin != a.savedStartAtLogin
 	keys := maps.Clone(a.pendingKeys)
 	keys["proxy-password"] = a.proxyPassword
 	a.systemBusy = true
@@ -128,8 +217,36 @@ func (a *App) saveSettings() {
 			}
 			next := a.Data
 			next.Settings = settings
-			if err := a.Store.Save(next); err != nil {
-				a.failure = "保存设置: " + err.Error()
+			previousStartAtLogin := a.login.OpenAtLogin()
+			previousSelectionWatch := a.stopSelectionWatch != nil
+			var saveErr error
+			if a.Window != nil && previousSelectionWatch != (settings.ShowSelectionIcon || settings.AutoTranslate) {
+				if err := a.setSelectionWatch(settings.ShowSelectionIcon || settings.AutoTranslate); err != nil {
+					saveErr = fmt.Errorf("启用划词: %w", err)
+				}
+			}
+			if saveErr == nil && startAtLoginEdited && startAtLogin != previousStartAtLogin {
+				if err := a.login.SetOpenAtLogin(startAtLogin); err != nil {
+					saveErr = fmt.Errorf("设置开机启动: %w", err)
+				}
+			}
+			if saveErr == nil {
+				if err := a.Store.Save(next); err != nil {
+					saveErr = fmt.Errorf("保存设置: %w", err)
+				}
+			}
+			if saveErr != nil {
+				a.failure = saveErr.Error()
+				if previousSelectionWatch != (a.stopSelectionWatch != nil) {
+					if rollback := a.setSelectionWatch(previousSelectionWatch); rollback != nil {
+						a.failure += "；恢复划词: " + rollback.Error()
+					}
+				}
+				if a.login.OpenAtLogin() != previousStartAtLogin {
+					if rollback := a.login.SetOpenAtLogin(previousStartAtLogin); rollback != nil {
+						a.failure += "；恢复开机启动: " + rollback.Error()
+					}
+				}
 				if rollback := a.registerShortcuts(a.Data.Settings); rollback != nil {
 					a.failure += "；" + rollback.Error()
 				}
@@ -144,14 +261,29 @@ func (a *App) saveSettings() {
 				}()
 				return
 			}
+			checkUpdates := settings.AutoCheckUpdates && !a.Data.Settings.AutoCheckUpdates
 			a.Data.Settings = settings
+			a.savedStartAtLogin = a.login.OpenAtLogin()
+			if a.startAtLogin == startAtLogin {
+				a.startAtLogin = a.savedStartAtLogin
+			}
+			if a.Window != nil && a.tray != nil {
+				a.applyTaskbarIcon(settings.HideTaskbarIcon)
+			}
+			if !settings.ShowSelectionIcon && a.selectionIcon != nil {
+				a.selectionIcon.Hide()
+			}
+			if a.Window != nil && desktop.SupportsBackgroundBlur() {
+				material := mygo.VibrancyNone
+				if settings.BackgroundBlur {
+					material = mygo.VibrancyAcrylic
+				}
+				a.Window.SetVibrancy(material)
+			}
 			if settings.UILanguage != "" {
 				mygo.App.SetLocale(settings.UILanguage)
 			}
 			mygo.App.SetMenu(a.Menu())
-			if runtime.GOOS == "linux" && a.tray != nil {
-				a.tray.SetMenu(a.newTrayMenu())
-			}
 			for provider, key := range keys {
 				a.keys[provider] = key
 				a.keyLoaded[provider] = true
@@ -162,6 +294,12 @@ func (a *App) saveSettings() {
 			}
 			a.client = client
 			a.Engine = core.Engine{Client: client}
+			if !settings.AutoCheckUpdates {
+				a.latestVersion = ""
+			} else if checkUpdates {
+				a.checkForUpdates()
+			}
+			a.refreshTray()
 			a.systemBusy = false
 			a.failure = ""
 			a.notice = "设置已保存"
@@ -188,15 +326,14 @@ func (a *App) selection() {
 		}
 		a.update(func() {
 			a.systemBusy = false
-			a.Window.Show()
-			a.Window.Focus()
 			a.page = "translator"
 			if err != nil {
+				a.showAtPointer()
 				a.failure = err.Error()
 				return
 			}
 			a.text = text
-			a.start()
+			a.startLookup()
 		})
 	}()
 }

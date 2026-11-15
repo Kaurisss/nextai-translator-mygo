@@ -122,6 +122,16 @@ func TestSettingsValidation(t *testing.T) {
 	if err := ValidateSettings(s); err == nil {
 		t.Fatal("invalid writing language accepted")
 	}
+	s = DefaultData().Settings
+	s.FontSize = 11
+	if err := ValidateSettings(s); err == nil {
+		t.Fatal("invalid font size accepted")
+	}
+	s = DefaultData().Settings
+	s.LanguageDetection = "unknown"
+	if err := ValidateSettings(s); err == nil {
+		t.Fatal("invalid language detector accepted")
+	}
 }
 
 func TestGeminiModelCapabilitiesAndGenerationFilter(t *testing.T) {

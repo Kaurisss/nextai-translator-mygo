@@ -14,6 +14,14 @@ func ValidateSettings(s Settings) error {
 	default:
 		return errors.New("不支持的界面语言")
 	}
+	if s.FontSize != 0 && (s.FontSize < 12 || s.FontSize > 40) || s.UIFontSize != 0 && (s.UIFontSize < 12 || s.UIFontSize > 24) {
+		return errors.New("字体大小超出允许范围")
+	}
+	switch s.LanguageDetection {
+	case "", "本地", "百度", "谷歌", "必应":
+	default:
+		return errors.New("不支持的语种检测引擎")
+	}
 	p, ok := s.Profiles[s.Provider]
 	if !ok {
 		return errors.New("请选择模型服务")

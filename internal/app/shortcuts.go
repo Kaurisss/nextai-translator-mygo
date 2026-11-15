@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/egoist/mygo"
-	"github.com/egoist/mygo/ui"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/desktop"
+	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/ui"
 )
 
 func (a *App) registerShortcuts(settings core.Settings) error {
@@ -23,7 +23,7 @@ func (a *App) registerShortcuts(settings core.Settings) error {
 	if maps.Equal(wanted, a.registered) {
 		return nil
 	}
-	callbacks := map[string]func(){"取词": a.selection, "显示窗口": func() { a.Window.Show(); a.Window.Focus() }, "OCR": func() {
+	callbacks := map[string]func(){"取词": a.selection, "显示窗口": a.showAtPointer, "OCR": func() {
 		if !a.busy && !a.systemBusy {
 			a.screenshot()
 		}

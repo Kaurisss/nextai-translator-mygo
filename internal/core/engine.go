@@ -19,6 +19,7 @@ type Query struct {
 	Action                      Action
 	Writing                     bool
 	SelectedWord, ArticlePrompt string
+	LanguageDetection           string
 }
 type Engine struct{ Client *http.Client }
 
@@ -39,6 +40,12 @@ func (e Engine) Stream(ctx context.Context, q Query, emit func(string)) error {
 	}
 	if q.Key == "" && p.Name != "Ollama" && p.Name != "LiteLLM" {
 		return errors.New("请在设置中填写 API Key")
+	}
+	if q.Source == "自动检测" && q.LanguageDetection != "" && q.LanguageDetection != "本地" {
+		q.Source = detectLanguage(ctx, e.Client, q.LanguageDetection, q.Text)
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 	}
 	prompt, err := BuildPrompt(q)
 	if err != nil {

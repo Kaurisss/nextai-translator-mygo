@@ -15,7 +15,9 @@ import (
 
 func testApp(t *testing.T) *App {
 	t.Helper()
-	return New(core.DefaultData(), core.Store{Path: filepath.Join(t.TempDir(), "data.json")})
+	a := New(core.DefaultData(), core.Store{Path: filepath.Join(t.TempDir(), "data.json")})
+	a.login = &testLoginItem{}
+	return a
 }
 
 func click(t *testing.T, tt *ui.Tester, label string) {
@@ -203,7 +205,7 @@ func TestSettingsLabelsAndControlsShareAlignment(t *testing.T) {
 		a.page = "settings"
 		tt := ui.NewTester(a.View, size[0], size[1])
 		var captionX float32
-		for i, label := range []string{"默认服务提供商", "API 密钥", "无模型 API 支持", "API 模型", "API URL", "API URL 路径", "默认动作", "默认目标语言", "外观"} {
+		for i, label := range []string{"主题", "默认服务提供商", "API 密钥", "无模型 API 支持", "API 模型", "API URL", "API URL 路径", "默认动作", "默认目标语言"} {
 			b, ok := tt.Find(label)
 			if !ok {
 				t.Fatalf("label %q missing", label)

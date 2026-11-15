@@ -5,8 +5,8 @@ package desktop
 import (
 	"context"
 	"errors"
-	"github.com/egoist/mygo"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
+	"github.com/egoist/mygo"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -85,6 +85,8 @@ func CopyAll(ctx context.Context) error {
 }
 
 func PointerPosition() (Point, error) { return Point{}, nil }
+
+func SupportsBackgroundBlur() bool { return runtime.GOOS == "darwin" }
 
 func QuickText(ctx context.Context, _ Point) (string, error) {
 	if err := CopySelection(ctx); err != nil {

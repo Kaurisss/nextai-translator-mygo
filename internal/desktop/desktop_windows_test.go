@@ -25,6 +25,19 @@ func TestWindowsPowerShellUTF8(t *testing.T) {
 	}
 }
 
+func TestWindowsSelectionRejectsReleaseOutsideSourceWindow(t *testing.T) {
+	target := ActiveWindow()
+	if target == 0 {
+		t.Skip("no foreground window in this session")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // Rejected gestures must return without starting PowerShell.
+	selection := Selection{point: Point{-1 << 31, -1 << 31}, window: target}
+	if text, window, err := selection.Read(ctx, true); text != "" || window != 0 || err != nil {
+		t.Fatalf("gesture outside the source window: text=%q window=%v err=%v", text, window, err)
+	}
+}
+
 func TestWindowsOCR(t *testing.T) {
 	path := os.Getenv("NEXTAI_OCR_TEST_IMAGE")
 	if path == "" {

@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"runtime"
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/desktop"
+	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 )
 
@@ -45,6 +47,13 @@ func (a *App) settings(c *ui.Context) {
 		ui.Row(c).Padding(t.Space(3), t.Space(5), t.Space(2)).Gap(t.Space(2.5)).AlignItems(ui.Center).Children(func() {
 			ui.Image(c, a.logo).Size(t.Space(6), t.Space(6)).Radius(t.Space(1.5))
 			ui.Text(c, "NextAI Translator").FontSize(t.Rem(1.3)).Bold()
+			version := mygo.App.Version()
+			if version == "" {
+				version = "dev"
+			} else {
+				version = "v" + strings.TrimPrefix(version, "v")
+			}
+			ui.Link(c, version, "https://github.com/Kaurisss/nextai-translator-mygo/releases").FontSize(max(12, t.Rem(12.0/14)))
 		})
 		tabs := ui.TabsBase(c, &a.settingsTab, 5)
 		tabs.List.Label(a.tr("设置分类")).WidthPercent(100).Children(func() {
@@ -59,7 +68,7 @@ func (a *App) settings(c *ui.Context) {
 				}
 				tabEl.Children(func() {
 					ui.Icon(c, icons[tab.icon]).Size(t.Space(4), t.Space(4))
-					ui.Text(c, a.tr(tab.name)).FontSize(12).SingleLine().Shrink(1)
+					ui.Text(c, a.tr(tab.name)).FontSize(max(12, t.Rem(12.0/14))).SingleLine().Shrink(1)
 				})
 			}
 		})
@@ -109,6 +118,15 @@ func (a *App) generalSettings(c *ui.Context) {
 		}
 		return control
 	})
+	settingsField(c, a.tr("主题"), "", func() ui.Element {
+		return a.selectSetting(c, &s.Appearance, []string{"跟随系统", "浅色", "深色"}).Label(a.tr("主题"))
+	})
+	ui.Checkbox(c, &a.startAtLogin, a.tr("开机启动")).Label(a.tr("开机启动"))
+	hideIcon := "隐藏任务栏中的图标"
+	if runtime.GOOS == "darwin" {
+		hideIcon = "隐藏 Dock 栏中的图标"
+	}
+	ui.Checkbox(c, &s.HideTaskbarIcon, a.tr(hideIcon)).Label(a.tr(hideIcon))
 	settingsField(c, a.tr("默认服务提供商"), "", func() ui.Element {
 		var providers []string
 		for _, p := range core.Providers {
@@ -218,9 +236,43 @@ func (a *App) generalSettings(c *ui.Context) {
 	settingsField(c, a.tr("默认目标语言"), "", func() ui.Element {
 		return a.languagePicker(c, &s.DefaultTarget, core.Languages, a.tr("默认目标语言"))
 	})
-	settingsField(c, a.tr("外观"), "", func() ui.Element {
-		return a.selectSetting(c, &s.Appearance, []string{"跟随系统", "浅色", "深色"}).Label(a.tr("外观"))
+	settingsField(c, a.tr("语种检测引擎"), a.tr("在线检测会将文本发送给所选服务"), func() ui.Element {
+		return a.selectSetting(c, &s.LanguageDetection, []string{"本地", "百度", "谷歌", "必应"}).Label(a.tr("语种检测引擎"))
 	})
+	settingsField(c, a.tr("字体大小"), "", func() ui.Element {
+		value := float64(s.FontSize)
+		if value == 0 {
+			value = float64(c.Theme().FontSize)
+		}
+		input := ui.NumberInput(c, &value, 12, 40, 1).Label(a.tr("字体大小"))
+		if input.Changed() {
+			s.FontSize = int(value)
+		}
+		return input
+	})
+	settingsField(c, a.tr("UI 字体大小"), "", func() ui.Element {
+		value := float64(s.UIFontSize)
+		if value == 0 {
+			value = float64(c.Theme().FontSize)
+		}
+		input := ui.NumberInput(c, &value, 12, 24, 1).Label(a.tr("UI 字体大小"))
+		if input.Changed() {
+			s.UIFontSize = int(value)
+		}
+		return input
+	})
+	if desktop.SupportsBackgroundBlur() {
+		ui.Checkbox(c, &s.BackgroundBlur, a.tr("窗口背景模糊")).Label(a.tr("窗口背景模糊"))
+	}
+	ui.Checkbox(c, &s.AutoHideOnBlur, a.tr("失去焦点时自动隐藏窗口")).Label(a.tr("失去焦点时自动隐藏窗口"))
+	ui.Checkbox(c, &s.FixedPosition, a.tr("固定位置")).Label(a.tr("固定位置"))
+	if runtime.GOOS != "linux" {
+		ui.Checkbox(c, &s.ShowSelectionIcon, a.tr("选中文字时显示图标")).Label(a.tr("选中文字时显示图标"))
+		ui.Checkbox(c, &s.AutoTranslate, a.tr("自动翻译")).Label(a.tr("自动翻译"))
+		ui.Checkbox(c, &s.SelectInputText, a.tr("输入框划词")).Label(a.tr("输入框划词")).Disabled(!s.ShowSelectionIcon && !s.AutoTranslate)
+	}
+	ui.Checkbox(c, &s.CompactLookup, a.tr("紧凑划词模式")).Label(a.tr("紧凑划词模式"))
+	ui.Checkbox(c, &s.AutoCheckUpdates, a.tr("自动检查更新")).Label(a.tr("自动检查更新"))
 	ui.Toolbar(c, func() {
 		if iconTextButton(c, "export", a.tr("导出备份"), "", false).Disabled(a.systemBusy).Clicked() {
 			a.export("backup")

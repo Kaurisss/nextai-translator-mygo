@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 	"unicode/utf16"
@@ -25,6 +26,18 @@ var foreground = user32.NewProc("GetForegroundWindow")
 var setForeground = user32.NewProc("SetForegroundWindow")
 var keyEvent = user32.NewProc("keybd_event")
 var clipboardSequence = user32.NewProc("GetClipboardSequenceNumber")
+
+var backgroundBlurSupported = sync.OnceValue(func() bool {
+	var version struct {
+		size, major, minor, build, platform uint32
+		servicePack                         [128]uint16
+	}
+	version.size = uint32(unsafe.Sizeof(version))
+	status, _, _ := syscall.NewLazyDLL("ntdll.dll").NewProc("RtlGetVersion").Call(uintptr(unsafe.Pointer(&version)))
+	return status == 0 && (version.major > 10 || version.major == 10 && version.build >= 22621)
+})
+
+func SupportsBackgroundBlur() bool { return backgroundBlurSupported() }
 
 func ActiveWindow() uintptr { h, _, _ := foreground.Call(); return h }
 

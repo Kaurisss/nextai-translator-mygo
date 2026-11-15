@@ -2,15 +2,32 @@ package app
 
 import (
 	"context"
+	"errors"
 	"image/png"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
-	"github.com/egoist/mygo/ui"
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
+	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/ui"
 )
+
+type testLoginItem struct {
+	enabled bool
+	err     error
+}
+
+func (s *testLoginItem) OpenAtLogin() bool { return s.enabled }
+func (s *testLoginItem) SetOpenAtLogin(enabled bool) error {
+	if s.err != nil {
+		return s.err
+	}
+	s.enabled = enabled
+	return nil
+}
 
 func TestSettingsTabsKeepSaveAndBackVisible(t *testing.T) {
 	for _, size := range [][2]int{{560, 880}, {500, 560}} {
@@ -85,7 +102,7 @@ func TestInterfaceLanguageKeepsStoredValues(t *testing.T) {
 	a.settingsDraft.UILanguage = "en"
 	a.page = "settings"
 	tt := ui.NewTester(a.View, 560, 880)
-	for _, label := range []string{"Settings", "General", "Proxy", "TTS", "Writing", "Shortcuts", "API Model"} {
+	for _, label := range []string{"Settings", "General", "Proxy", "TTS", "Writing", "Shortcuts", "Theme", "API Model"} {
 		if !tt.HasText(label) {
 			t.Errorf("English label missing: %s", label)
 		}
@@ -107,6 +124,234 @@ func TestInterfaceLanguageKeepsStoredValues(t *testing.T) {
 	click(t, selector, "Dark")
 	if value != "深色" {
 		t.Fatalf("localized value persisted as %q", value)
+	}
+}
+
+func TestGeneralThemeSelectionAndPersistence(t *testing.T) {
+	for _, size := range [][2]int{{500, 560}, {560, 880}} {
+		a := testApp(t)
+		a.page = "settings"
+		a.Data.Settings.Shortcut = ""
+		a.settingsDraft.Shortcut = ""
+		a.credentials = &memoryCredentials{values: map[string]string{}}
+		updates := make(chan func(), 8)
+		a.post = func(update func()) { updates <- update }
+		var background ui.Color
+		tt := ui.NewTester(func(c *ui.Context) {
+			a.View(c)
+			background = c.Theme().Background
+		}, size[0], size[1])
+		theme, ok := tt.Find("主题")
+		scroll, scrollOK := tt.Find("设置内容")
+		if !ok || !scrollOK || theme.Y < scroll.Y || theme.Y+theme.H > scroll.Y+scroll.H {
+			t.Fatalf("theme setting not visible at %v: theme %+v scroll %+v", size, theme, scroll)
+		}
+		for _, choice := range []struct {
+			name       string
+			systemDark bool
+			background ui.Color
+		}{
+			{"深色", false, ui.DarkTheme().Background},
+			{"浅色", true, ui.LightTheme().Background},
+			{"跟随系统", true, ui.DarkTheme().Background},
+		} {
+			tt.SetDark(choice.systemDark)
+			before := a.Data.Settings.Appearance
+			click(t, tt, "主题")
+			click(t, tt, choice.name)
+			if a.settingsDraft.Appearance != choice.name || a.Data.Settings.Appearance != before {
+				t.Fatalf("theme selection changed applied settings before save: draft %q, saved %q", a.settingsDraft.Appearance, a.Data.Settings.Appearance)
+			}
+			click(t, tt, "保存设置")
+			finishSettingsSave(t, a, updates)
+			tt.Frame()
+			if a.failure != "" || a.Data.Settings.Appearance != choice.name || background != choice.background {
+				t.Fatalf("theme %q not applied: saved %q background %+v error %q", choice.name, a.Data.Settings.Appearance, background, a.failure)
+			}
+			saved, err := a.Store.Load()
+			if err != nil {
+				t.Fatal(err)
+			}
+			restored := New(saved, a.Store)
+			var restoredBackground ui.Color
+			restoredTester := ui.NewTester(func(c *ui.Context) {
+				restored.View(c)
+				restoredBackground = c.Theme().Background
+			}, size[0], size[1])
+			restoredTester.SetDark(choice.systemDark)
+			if restored.settingsDraft.Appearance != choice.name || restoredBackground != choice.background {
+				t.Fatalf("theme %q not restored: draft %q background %+v", choice.name, restored.settingsDraft.Appearance, restoredBackground)
+			}
+		}
+		tt.SetDark(false)
+		if background != ui.LightTheme().Background {
+			t.Fatalf("system theme change not followed: %+v", background)
+		}
+	}
+}
+
+func TestStartupAndTaskbarSettings(t *testing.T) {
+	a := testApp(t)
+	login := a.login.(*testLoginItem)
+	a.Data.Settings.Shortcut = ""
+	a.settingsDraft.Shortcut = ""
+	a.credentials = &memoryCredentials{values: map[string]string{}}
+	updates := make(chan func(), 8)
+	a.post = func(update func()) { updates <- update }
+	a.page = "settings"
+	tt := ui.NewTester(a.View, 560, 880)
+
+	click(t, tt, "开机启动")
+	hideIcon := "隐藏任务栏中的图标"
+	if runtime.GOOS == "darwin" {
+		hideIcon = "隐藏 Dock 栏中的图标"
+	}
+	click(t, tt, hideIcon)
+	if login.enabled || a.Data.Settings.HideTaskbarIcon {
+		t.Fatal("unsaved settings were applied")
+	}
+	click(t, tt, "保存设置")
+	finishSettingsSave(t, a, updates)
+	if a.failure != "" || !login.enabled || !a.Data.Settings.HideTaskbarIcon {
+		t.Fatalf("settings not applied: login %v taskbar %v error %q", login.enabled, a.Data.Settings.HideTaskbarIcon, a.failure)
+	}
+	saved, err := a.Store.Load()
+	if err != nil || !saved.Settings.HideTaskbarIcon {
+		t.Fatalf("taskbar setting not saved: %+v %v", saved.Settings, err)
+	}
+
+	login.enabled = false
+	a.openSettings()
+	if a.startAtLogin || a.savedStartAtLogin {
+		t.Fatal("settings did not reflect the system's startup setting")
+	}
+	a.startAtLogin = true
+	a.openSettings()
+	if !a.startAtLogin {
+		t.Fatal("opening settings discarded the unsaved startup setting")
+	}
+}
+
+func TestStartupSettingRollsBackWhenSaveFails(t *testing.T) {
+	a := testApp(t)
+	login := a.login.(*testLoginItem)
+	a.Data.Settings.Shortcut = ""
+	a.settingsDraft.Shortcut = ""
+	a.credentials = &memoryCredentials{values: map[string]string{}}
+	a.startAtLogin = true
+	updates := make(chan func(), 8)
+	a.post = func(update func()) { updates <- update }
+	a.Store.Path = t.TempDir()
+	a.saveSettings()
+	finishSettingsSave(t, a, updates)
+	if a.failure == "" || login.enabled {
+		t.Fatalf("failed save left startup enabled: error %q login %v", a.failure, login.enabled)
+	}
+
+	login.err = errors.New("startup failed")
+	a.saveSettings()
+	finishSettingsSave(t, a, updates)
+	if a.failure == "" || login.enabled {
+		t.Fatalf("startup error ignored: error %q login %v", a.failure, login.enabled)
+	}
+}
+
+func TestFontSettingsChangeInputAndOutput(t *testing.T) {
+	a := testApp(t)
+	a.Data.Settings.Shortcut = ""
+	a.settingsDraft.Shortcut = ""
+	a.credentials = &memoryCredentials{values: map[string]string{}}
+	updates := make(chan func(), 8)
+	a.post = func(update func()) { updates <- update }
+	a.page = "settings"
+	tt := ui.NewTester(a.View, 560, 880)
+	tt.Scroll(300, 400, 0, 2000)
+	click(t, tt, "字体大小")
+	tt.Key(ui.Cmd, ui.KeyA)
+	tt.Type("24")
+	tt.Key(0, ui.KeyTab)
+	click(t, tt, "UI 字体大小")
+	tt.Key(ui.Cmd, ui.KeyA)
+	tt.Type("18")
+	tt.Key(0, ui.KeyTab)
+	click(t, tt, "保存设置")
+	finishSettingsSave(t, a, updates)
+	if a.failure != "" || a.Data.Settings.FontSize != 24 || a.Data.Settings.UIFontSize != 18 {
+		t.Fatalf("font settings not saved: %d %d %s", a.Data.Settings.FontSize, a.Data.Settings.UIFontSize, a.failure)
+	}
+	loaded, err := a.Store.Load()
+	if err != nil || loaded.Settings.FontSize != 24 || loaded.Settings.UIFontSize != 18 {
+		t.Fatalf("font settings not restored: %+v %v", loaded.Settings, err)
+	}
+	a.page = "translator"
+	a.result = "Result size"
+	var themeSize float32
+	view := ui.NewTester(func(c *ui.Context) {
+		a.View(c)
+		themeSize = c.Theme().FontSize
+	}, 560, 880)
+	result, ok := view.Find("Result size")
+	if !ok || themeSize != 18 || a.md.Theme.FontSize != 24 || result.H < 24 {
+		t.Fatalf("font settings not rendered: theme %v markdown %+v result %+v", themeSize, a.md.Theme, result)
+	}
+}
+
+func TestPositionNearPointerStaysOnDisplay(t *testing.T) {
+	area := mygo.Rectangle{X: -1920, Y: -100, Width: 1920, Height: 1040}
+	for _, tc := range []struct {
+		point mygo.Point
+		want  mygo.Point
+	}{
+		{mygo.Point{X: -1700, Y: 100}, mygo.Point{X: -1700, Y: 100}},
+		{mygo.Point{X: -10, Y: 930}, mygo.Point{X: -500, Y: 440}},
+	} {
+		if got := positionNearPointer(tc.point, area, 500, 500); got != tc.want {
+			t.Errorf("position for %+v = %+v, want %+v", tc.point, got, tc.want)
+		}
+	}
+}
+
+func TestInlineLookupRendersTranslation(t *testing.T) {
+	a := testApp(t)
+	a.generation, a.inlineGeneration = 1, 1
+	a.Data.Settings.FontSize = 22
+	a.result = "first line\nsecond line"
+	tt := ui.NewTester(a.inlineView, 420, 240)
+	if _, ok := tt.Find("first line\nsecond line"); !ok || a.md.Theme.FontSize != 22 {
+		t.Fatalf("inline translation missing: %v", tt.Texts())
+	}
+}
+
+func TestInlineCloseDoesNotCancelNextTranslation(t *testing.T) {
+	a := testApp(t)
+	a.generation, a.inlineGeneration = 1, 1
+	a.result = "lookup result"
+	popup := ui.NewTester(a.inlineView, 420, 240)
+	if !popup.HasText("lookup result") {
+		t.Fatal("popup did not show its own result")
+	}
+
+	release := make(chan struct{})
+	defer close(release)
+	a.Engine = delayedEngine{release: release}
+	updates := make(chan func(), 2)
+	a.post = func(update func()) { updates <- update }
+	a.text = "new main request"
+	a.start()
+	popup.Frame()
+	if popup.HasText("lookup result") || a.inlineGeneration != 0 {
+		t.Fatal("new translation did not dismiss the old lookup")
+	}
+	a.closeInlineLookup()
+	if !a.busy || a.generation != 2 {
+		t.Fatal("closing an old lookup canceled the main request")
+	}
+
+	a.inlineGeneration = a.generation
+	popup.Frame()
+	click(t, popup, "关闭")
+	if a.busy || a.inlineGeneration != 0 {
+		t.Fatal("closing a lookup did not cancel its own request")
 	}
 }
 

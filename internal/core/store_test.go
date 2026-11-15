@@ -24,7 +24,7 @@ func TestOldSettingsReceiveNewDefaultsWithoutLosingValues(t *testing.T) {
 	if err := json.Unmarshal(old["settings"], &settings); err != nil {
 		t.Fatal(err)
 	}
-	for _, field := range []string{"uiLanguage", "defaultTarget", "speech", "proxy", "writing", "defaultAction"} {
+	for _, field := range []string{"uiLanguage", "defaultTarget", "speech", "proxy", "writing", "defaultAction", "fixedPosition", "languageDetection", "autoCheckUpdates", "selectInputText"} {
 		delete(settings, field)
 	}
 	old["settings"], err = json.Marshal(settings)
@@ -43,7 +43,7 @@ func TestOldSettingsReceiveNewDefaultsWithoutLosingValues(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Settings.Target != "English" || got.Settings.DefaultTarget != "English" || got.Settings.Speech.Rate != 1 || got.Settings.Speech.Volume != 100 || got.Settings.Writing.Target != "English" || !reflect.DeepEqual(got.Actions, d.Actions) {
+	if got.Settings.Target != "English" || got.Settings.DefaultTarget != "English" || got.Settings.Speech.Rate != 1 || got.Settings.Speech.Volume != 100 || got.Settings.Writing.Target != "English" || !got.Settings.FixedPosition || got.Settings.LanguageDetection != "本地" || !got.Settings.AutoCheckUpdates || !got.Settings.SelectInputText || !reflect.DeepEqual(got.Actions, d.Actions) {
 		t.Fatalf("old settings migration %+v", got.Settings)
 	}
 	got.Settings.Speech.Volume = 0

@@ -19,21 +19,33 @@ type Profile struct {
 }
 
 type Settings struct {
-	UILanguage      string             `json:"uiLanguage,omitempty"`
-	Provider        string             `json:"provider"`
-	Profiles        map[string]Profile `json:"profiles"`
-	Source          string             `json:"source"`
-	Target          string             `json:"target"`
-	Shortcut        string             `json:"shortcut"`
-	Appearance      string             `json:"appearance"`
-	DefaultAction   string             `json:"defaultAction,omitempty"`
-	DefaultTarget   string             `json:"defaultTarget,omitempty"`
-	DisplayShortcut string             `json:"displayShortcut,omitempty"`
-	OCRShortcut     string             `json:"ocrShortcut,omitempty"`
-	QuickShortcut   string             `json:"quickShortcut,omitempty"`
-	Proxy           ProxySettings      `json:"proxy"`
-	Speech          SpeechSettings     `json:"speech"`
-	Writing         WritingSettings    `json:"writing"`
+	UILanguage        string             `json:"uiLanguage,omitempty"`
+	Provider          string             `json:"provider"`
+	Profiles          map[string]Profile `json:"profiles"`
+	Source            string             `json:"source"`
+	Target            string             `json:"target"`
+	Shortcut          string             `json:"shortcut"`
+	Appearance        string             `json:"appearance"`
+	HideTaskbarIcon   bool               `json:"hideTaskbarIcon,omitempty"`
+	FontSize          int                `json:"fontSize,omitempty"`
+	UIFontSize        int                `json:"uiFontSize,omitempty"`
+	BackgroundBlur    bool               `json:"backgroundBlur,omitempty"`
+	AutoHideOnBlur    bool               `json:"autoHideOnBlur,omitempty"`
+	FixedPosition     bool               `json:"fixedPosition"`
+	LanguageDetection string             `json:"languageDetection,omitempty"`
+	AutoCheckUpdates  bool               `json:"autoCheckUpdates"`
+	CompactLookup     bool               `json:"compactLookup,omitempty"`
+	ShowSelectionIcon bool               `json:"showSelectionIcon,omitempty"`
+	AutoTranslate     bool               `json:"autoTranslate,omitempty"`
+	SelectInputText   bool               `json:"selectInputText"`
+	DefaultAction     string             `json:"defaultAction,omitempty"`
+	DefaultTarget     string             `json:"defaultTarget,omitempty"`
+	DisplayShortcut   string             `json:"displayShortcut,omitempty"`
+	OCRShortcut       string             `json:"ocrShortcut,omitempty"`
+	QuickShortcut     string             `json:"quickShortcut,omitempty"`
+	Proxy             ProxySettings      `json:"proxy"`
+	Speech            SpeechSettings     `json:"speech"`
+	Writing           WritingSettings    `json:"writing"`
 }
 
 type ProxySettings struct {
@@ -155,7 +167,15 @@ func DefaultData() Data {
 		profiles[p.Name] = Profile{Provider: p.Name, Endpoint: p.Endpoint, Model: p.Model}
 	}
 	return Data{
-		Settings: Settings{UILanguage: "zh-Hans", Provider: "OpenAI", Profiles: profiles, Source: "自动检测", Target: "简体中文", DefaultTarget: "简体中文", Shortcut: "CmdOrCtrl+Shift+T", Appearance: "跟随系统", DefaultAction: "翻译", Proxy: ProxySettings{Protocol: "HTTP", Server: "127.0.0.1", Port: "1080", NoProxy: "localhost,127.0.0.1"}, Speech: SpeechSettings{Provider: "系统默认", Rate: 1, Volume: 100}, Writing: WritingSettings{Target: "English", NewlineShortcut: "Shift+Enter"}},
+		Settings: Settings{
+			UILanguage: "zh-Hans", Provider: "OpenAI", Profiles: profiles,
+			Source: "自动检测", Target: "简体中文", DefaultTarget: "简体中文",
+			Shortcut: "CmdOrCtrl+Shift+T", Appearance: "跟随系统", DefaultAction: "翻译",
+			FixedPosition: true, LanguageDetection: "本地", AutoCheckUpdates: true, SelectInputText: true,
+			Proxy:   ProxySettings{Protocol: "HTTP", Server: "127.0.0.1", Port: "1080", NoProxy: "localhost,127.0.0.1"},
+			Speech:  SpeechSettings{Provider: "系统默认", Rate: 1, Volume: 100},
+			Writing: WritingSettings{Target: "English", NewlineShortcut: "Shift+Enter"},
+		},
 		Actions: []Action{
 			{ID: "translate", Mode: "translate", Name: "翻译"},
 			{ID: "polishing", Mode: "polishing", Name: "润色"},
