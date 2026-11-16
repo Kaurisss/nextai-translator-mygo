@@ -64,8 +64,7 @@ func (a *App) clearSelection() {
 
 func (a *App) selectionGesture(watchGeneration uint64, selection desktop.Selection) {
 	a.update(func() {
-		if a.stopSelectionWatch == nil || a.selectionWatchGeneration != watchGeneration || a.busy || a.systemBusy || a.Window.IsFocused() ||
-			a.inlineWindow != nil && a.inlineWindow.IsFocused() || a.selectionIcon != nil && a.selectionIcon.IsFocused() {
+		if a.stopSelectionWatch == nil || a.selectionWatchGeneration != watchGeneration || a.busy || a.systemBusy || mygo.App.IsActive() {
 			return
 		}
 		a.clearSelection()
@@ -77,8 +76,7 @@ func (a *App) selectionGesture(watchGeneration uint64, selection desktop.Selecti
 			defer cancel()
 			text, target, err := selection.Read(ctx, allowInput)
 			a.update(func() {
-				if a.selectionGeneration != generation || a.stopSelectionWatch == nil || a.Data.Settings.SelectInputText != allowInput || a.busy || a.systemBusy || a.Window.IsFocused() ||
-					a.inlineWindow != nil && a.inlineWindow.IsFocused() || a.selectionIcon != nil && a.selectionIcon.IsFocused() {
+				if a.selectionGeneration != generation || a.stopSelectionWatch == nil || a.Data.Settings.SelectInputText != allowInput || a.busy || a.systemBusy || mygo.App.IsActive() {
 					return
 				}
 				if err != nil {
@@ -89,6 +87,7 @@ func (a *App) selectionGesture(watchGeneration uint64, selection desktop.Selecti
 				if text == "" || target == 0 {
 					return
 				}
+				a.failure = ""
 				a.selectedText, a.selectedWindow = text, target
 				if action := a.selectionAction("translate"); a.Data.Settings.AutoTranslate && action != "" {
 					a.runSelectionAction(action)

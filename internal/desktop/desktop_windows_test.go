@@ -3,13 +3,64 @@ package desktop
 import (
 	"context"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
+	"unicode/utf16"
+	"unsafe"
 
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 )
+
+func TestSelectionReattachesToInputDesktop(t *testing.T) {
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+	thread, _, _ := currentThreadID.Call()
+	original, _, _ := getThreadDesktop.Call(thread)
+	input, _, err := openInputDesktop.Call(0, 0, 0x02000000)
+	if input == 0 {
+		t.Skipf("no interactive input desktop: %v", err)
+	}
+	defer closeDesktop.Call(input)
+	name := func(desktop uintptr) string {
+		var buffer [256]uint16
+		var size uint32
+		ok, _, err := user32.NewProc("GetUserObjectInformationW").Call(desktop, 2, uintptr(unsafe.Pointer(&buffer[0])), uintptr(unsafe.Sizeof(buffer)), uintptr(unsafe.Pointer(&size)))
+		if ok == 0 {
+			t.Fatalf("read desktop name: %v", err)
+		}
+		return string(utf16.Decode(buffer[:max(0, int(size)/2-1)]))
+	}
+	inputName := name(input)
+	testName, _ := syscall.UTF16PtrFromString("NextAI-selection-test-" + strconv.Itoa(os.Getpid()))
+	desktop, _, err := user32.NewProc("CreateDesktopW").Call(uintptr(unsafe.Pointer(testName)), 0, 0, 0, 0x10000000, 0)
+	if desktop == 0 {
+		t.Fatalf("create test desktop: %v", err)
+	}
+	defer closeDesktop.Call(desktop)
+	if ok, _, err := setThreadDesktop.Call(desktop); ok == 0 {
+		t.Fatalf("attach test desktop: %v", err)
+	}
+	defer setThreadDesktop.Call(original)
+	restore, err := attachInputDesktop()
+	if err != nil {
+		t.Fatal(err)
+	}
+	func() {
+		defer restore()
+		current, _, _ := getThreadDesktop.Call(thread)
+		if got := name(current); got != inputName {
+			t.Fatalf("selection stayed on desktop %q, want %q", got, inputName)
+		}
+	}()
+	current, _, _ := getThreadDesktop.Call(thread)
+	if name(current) != name(desktop) {
+		t.Fatal("selection did not restore the worker's original desktop")
+	}
+}
 
 func TestWindowsPowerShellUTF8(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

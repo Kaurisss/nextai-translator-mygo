@@ -12,6 +12,30 @@ import (
 var windowFromPhysicalPoint = user32.NewProc("WindowFromPhysicalPoint")
 var getAncestor = user32.NewProc("GetAncestor")
 var selectionDPI = user32.NewProc("SetThreadDpiAwarenessContext")
+var openInputDesktop = user32.NewProc("OpenInputDesktop")
+var getThreadDesktop = user32.NewProc("GetThreadDesktop")
+var setThreadDesktop = user32.NewProc("SetThreadDesktop")
+var closeDesktop = user32.NewProc("CloseDesktop")
+var currentThreadID = syscall.NewLazyDLL("kernel32.dll").NewProc("GetCurrentThreadId")
+
+// The thread's inherited desktop may differ from the input desktop at login.
+// Callers pin their goroutine until restore has run.
+func attachInputDesktop() (restore func(), err error) {
+	thread, _, _ := currentThreadID.Call()
+	previous, _, _ := getThreadDesktop.Call(thread)
+	input, _, err := openInputDesktop.Call(0, 0, 0x02000000) // MAXIMUM_ALLOWED
+	if input == 0 {
+		return nil, err
+	}
+	if ok, _, err := setThreadDesktop.Call(input); ok == 0 {
+		closeDesktop.Call(input)
+		return nil, err
+	}
+	return func() {
+		setThreadDesktop.Call(previous)
+		closeDesktop.Call(input)
+	}, nil
+}
 
 func packedPoint(point Point) uintptr {
 	return uintptr(uint64(uint32(point.X)) | uint64(uint32(point.Y))<<32)
@@ -20,6 +44,11 @@ func packedPoint(point Point) uintptr {
 func selectionWindowAt(point Point) uintptr {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
+	restore, err := attachInputDesktop()
+	if err != nil {
+		return 0
+	}
+	defer restore()
 	if previous, _, _ := selectionDPI.Call(^uintptr(3)); previous != 0 {
 		defer selectionDPI.Call(previous)
 	}
@@ -38,6 +67,13 @@ func selectionInputReader() (func() selectionInput, error) {
 		return state&0x8000 != 0
 	}
 	return func() selectionInput {
+		runtime.LockOSThread()
+		defer runtime.UnlockOSThread()
+		restore, err := attachInputDesktop()
+		if err != nil {
+			return selectionInput{}
+		}
+		defer restore()
 		return selectionInput{left: pressed(1), right: pressed(2), key: pressed(0x1b) || // Escape
 			pressed(0x21) || pressed(0x22) || pressed(0x23) || pressed(0x24) || // Page Up/Down, End, Home
 			pressed(0x25) || pressed(0x26) || pressed(0x27) || pressed(0x28)} // arrows
@@ -87,14 +123,19 @@ func (obj *uiaObject) call(slot int, args ...uintptr) bool {
 }
 
 func (s Selection) Read(ctx context.Context, allowInput bool) (string, uintptr, error) {
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+	restore, err := attachInputDesktop()
+	if err != nil {
+		return "", 0, nil
+	}
+	defer restore()
 	if s.window == 0 || ActiveWindow() != s.window || selectionWindowAt(s.point) != s.window {
 		return "", 0, nil
 	}
 	if err := ctx.Err(); err != nil {
 		return "", 0, err
 	}
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
 	hr, _, _ := uiaInitialize.Call(0, 0) // COINIT_MULTITHREADED
 	if int32(hr) < 0 {
 		return "", 0, fmt.Errorf("CoInitializeEx: 0x%08x", uint32(hr))

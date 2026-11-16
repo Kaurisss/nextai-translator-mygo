@@ -86,6 +86,10 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Test macOS desktop integration
+        if: matrix.os == 'darwin'
+        run: go test ./internal/desktop
+
       - name: Build installer (${{ matrix.platform }})
         run: go tool mygo build -platform ${{ matrix.platform }}
 

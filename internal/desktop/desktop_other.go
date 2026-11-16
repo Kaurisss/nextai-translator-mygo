@@ -16,31 +16,7 @@ import (
 	"time"
 )
 
-func ActiveWindow() uintptr {
-	var output []byte
-	var err error
-	if runtime.GOOS == "darwin" {
-		output, err = exec.Command("osascript", "-e", `tell application "System Events" to get unix id of first application process whose frontmost is true`).Output()
-	} else {
-		output, err = exec.Command("xdotool", "getactivewindow").Output()
-	}
-	if err != nil {
-		return 0
-	}
-	value, err := strconv.ParseUint(strings.TrimSpace(string(output)), 10, 64)
-	if err != nil {
-		return 0
-	}
-	return uintptr(value)
-}
-
 func hideCommand(*exec.Cmd) {}
-func CopySelection(ctx context.Context) error {
-	if runtime.GOOS == "darwin" {
-		return exec.CommandContext(ctx, "osascript", "-e", `tell application "System Events" to keystroke "c" using command down`).Run()
-	}
-	return exec.CommandContext(ctx, "xdotool", "key", "--clearmodifiers", "ctrl+c").Run()
-}
 func Paste(context.Context, uintptr) error {
 	return errors.New("此平台请使用复制按钮后粘贴到目标窗口")
 }
@@ -84,8 +60,6 @@ func CopyAll(ctx context.Context) error {
 	}
 	return CopySelection(ctx)
 }
-
-func PointerPosition() (Point, error) { return Point{}, nil }
 
 func SupportsBackgroundBlur() bool { return runtime.GOOS == "darwin" }
 
@@ -160,13 +134,6 @@ func SystemVoices(ctx context.Context) ([]Voice, error) {
 	}
 	return voices, nil
 }
-func OCR(ctx context.Context, path string) (string, error) {
-	b, err := exec.CommandContext(ctx, "tesseract", path, "stdout", "-l", "eng+chi_sim").CombinedOutput()
-	if err != nil {
-		return "", errors.New(strings.TrimSpace(string(b)) + ": " + err.Error())
-	}
-	return strings.TrimSpace(string(b)), nil
-}
 func Capture(ctx context.Context, path string, windows ...*mygo.Window) error {
 	if err := ctx.Err(); err != nil {
 		return err
@@ -187,8 +154,5 @@ func Capture(ctx context.Context, path string, windows ...*mygo.Window) error {
 		case <-time.After(150 * time.Millisecond):
 		}
 	}
-	if runtime.GOOS == "darwin" {
-		return exec.CommandContext(ctx, "screencapture", "-i", path).Run()
-	}
-	return exec.CommandContext(ctx, "gnome-screenshot", "-a", "-f", path).Run()
+	return captureScreen(ctx, path)
 }
