@@ -9,10 +9,12 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
+	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"
 )
 
@@ -27,6 +29,90 @@ func click(t *testing.T, tt *ui.Tester, label string) {
 	t.Helper()
 	if err := tt.Click(label); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestTrayMenuOffersOCRAndReflectsPinnedWindow(t *testing.T) {
+	a := testApp(t)
+	menu := a.newTrayMenu()
+	ocr := menu.ItemByID("ocr")
+	if ocr == nil || ocr.Label != "截图翻译" || ocr.Click == nil || ocr.Disabled {
+		t.Fatalf("tray OCR item unavailable: %+v", ocr)
+	}
+	for _, wantPinned := range []bool{true, false} {
+		pin := menu.ItemByID("pin")
+		if pin == nil || pin.Type != mygo.MenuItemCheckbox || pin.Checked != a.pinned || pin.Click == nil {
+			t.Fatalf("tray pin item does not reflect the window: %+v", pin)
+		}
+		pin.Click(pin, nil)
+		menu = a.newTrayMenu()
+		if a.pinned != wantPinned || menu.ItemByID("pin").Checked != wantPinned {
+			t.Fatalf("tray pin toggle did not set %v", wantPinned)
+		}
+	}
+}
+
+func TestWindowScrollbarsReachRightEdge(t *testing.T) {
+	a := testApp(t)
+	a.text = strings.Repeat("Original text\n", 90)
+	a.result = strings.Repeat("一行可滚动的译文\n\n", 90)
+	a.generation, a.inlineGeneration = 1, 1
+	a.Data.History = []core.Record{{ID: "one", Text: "source", Result: "translation"}}
+	a.Data.Vocabulary = []core.Word{{Text: "source", Description: "translation"}}
+	for _, test := range []struct {
+		name, page, label string
+		view              func(*ui.Context)
+		role              ui.Role
+		width, height     int
+	}{
+		{"main", "translator", "翻译结果", a.View, ui.RoleScroll, 560, 760},
+		{"inline", "translator", "翻译结果", a.inlineView, ui.RoleScroll, 420, 240},
+		{"quick", "translator", "翻译结果", a.quickView, ui.RoleScroll, 420, 340},
+		{"history", "history", "历史记录", a.View, ui.RoleList, 560, 760},
+		{"vocabulary", "vocabulary", "生词本", a.View, ui.RoleList, 560, 760},
+		{"actions", "actions", "动作管理", a.View, ui.RoleScroll, 560, 760},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			a.page = test.page
+			tt := ui.NewTester(test.view, test.width, test.height)
+			scroll, ok := tt.AccessByRole(test.role, test.label)
+			if !ok || scroll.Bounds.X > 1 || scroll.Bounds.X+scroll.Bounds.W < float32(test.width-1) {
+				t.Fatalf("scroll area is inset from the window: %+v", scroll.Bounds)
+			}
+			if test.label == "翻译结果" {
+				x, y := test.width-2, int(scroll.Bounds.Y)+10
+				before := tt.Image().RGBAAt(x, y)
+				tt.Move(float32(x), float32(y))
+				if tt.Image().RGBAAt(x, y) == before {
+					t.Fatal("scroll thumb is not painted at the window edge on hover")
+				}
+			}
+			if test.name == "main" {
+				input, ok := tt.Find("原文输入")
+				if !ok || input.X != 0 || input.W != float32(test.width) {
+					t.Fatalf("source editor is inset from the window: %+v", input)
+				}
+				y := int(input.Y + input.H/2)
+				frame := tt.Image()
+				edge, surface := frame.RGBAAt(4, y), frame.RGBAAt(25, y)
+				if edge == surface || frame.RGBAAt(test.width-5, y) != edge || frame.RGBAAt(test.width-25, y) != surface {
+					t.Fatal("visible source field must leave a margin on both sides")
+				}
+				x := test.width - 2
+				tt.Move(float32(x), float32(y))
+				hovered := tt.Image()
+				painted := false
+				for row := int(input.Y) + 3; row < int(input.Y+input.H)-3; row++ {
+					if hovered.RGBAAt(x, row) != frame.RGBAAt(x, row) {
+						painted = true
+						break
+					}
+				}
+				if !painted {
+					t.Fatal("source scroll thumb is not painted at the window edge on hover")
+				}
+			}
+		})
 	}
 }
 

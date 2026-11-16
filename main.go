@@ -29,7 +29,7 @@ func main() {
 		mygo.App.SetLocale(data.Settings.UILanguage)
 	}
 	mygo.App.SetMenu(a.Menu())
-	mygo.App.WhenReady(func() { a.Open(resources.Icon) })
+	mygo.App.WhenReady(func() { a.Open(resources.AppIcon, resources.Icon) })
 	if err := mygo.App.Run(); err != nil {
 		log.Fatal(err)
 	}

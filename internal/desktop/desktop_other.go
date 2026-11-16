@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func ActiveWindow() uintptr {
@@ -166,7 +167,26 @@ func OCR(ctx context.Context, path string) (string, error) {
 	}
 	return strings.TrimSpace(string(b)), nil
 }
-func Capture(ctx context.Context, path string) error {
+func Capture(ctx context.Context, path string, windows ...*mygo.Window) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	visible := false
+	mygo.RunOnMain(func() {
+		for _, w := range windows {
+			if w != nil && w.IsVisible() {
+				w.Hide()
+				visible = true
+			}
+		}
+	})
+	if visible {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(150 * time.Millisecond):
+		}
+	}
 	if runtime.GOOS == "darwin" {
 		return exec.CommandContext(ctx, "screencapture", "-i", path).Run()
 	}

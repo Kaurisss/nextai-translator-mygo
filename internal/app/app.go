@@ -78,8 +78,10 @@ type App struct {
 	quickWindow                                         *mygo.Window
 	inlineWindow                                        *mygo.Window
 	inlineGeneration                                    uint64
+	inlineFromSelection                                 bool
 	selectionIcon                                       *mygo.Window
 	stopSelectionWatch                                  func()
+	selectionCancel                                     context.CancelFunc
 	selectionGeneration                                 uint64
 	selectionWatchGeneration                            uint64
 	selectedText                                        string

@@ -20,6 +20,7 @@ func (a *App) startLookup() {
 }
 
 func (a *App) hideInlineLookup() {
+	a.inlineFromSelection = false
 	if a.inlineGeneration != 0 {
 		a.inlineGeneration = 0
 		if a.inlineWindow != nil {
@@ -60,8 +61,8 @@ func (a *App) inlineView(c *ui.Context) {
 	a.applyTheme(c)
 	t := c.Theme()
 	a.md.Theme = &markdown.Theme{FontSize: float32(a.Data.Settings.FontSize)}
-	ui.Column(c).Fill().Padding(t.Space(3)).Gap(t.Space(2)).Background(t.Background).Border(1, t.Border).Children(func() {
-		ui.Row(c).AlignItems(ui.Center).DragWindow().Children(func() {
+	ui.Column(c).Fill().Padding(t.Space(3), 0).Gap(t.Space(2)).Background(t.Background).Border(1, t.Border).Children(func() {
+		ui.Row(c).Margin(0, t.Space(3)).AlignItems(ui.Center).DragWindow().Children(func() {
 			ui.Text(c, "NextAI Translator").Bold()
 			ui.Spacer(c)
 			if iconButton(c, "copy", a.tr("复制")).Disabled(a.result == "").Clicked() {
@@ -71,7 +72,7 @@ func (a *App) inlineView(c *ui.Context) {
 				a.closeInlineLookup()
 			}
 		})
-		ui.Scroll(c).Grow(1).WidthPercent(100).Children(func() {
+		ui.Scroll(c).Grow(1).WidthPercent(100).Padding(0, t.Space(3)).Label(a.tr("翻译结果")).Children(func() {
 			if a.resultFormat == "纯文本" {
 				result := ui.Text(c, a.result).Selectable()
 				if a.Data.Settings.FontSize > 0 {
@@ -84,12 +85,12 @@ func (a *App) inlineView(c *ui.Context) {
 			}
 		})
 		if a.busy && a.result == "" {
-			ui.Spinner(c)
+			ui.Spinner(c).Margin(0, t.Space(3))
 		}
 		if a.failure != "" {
-			ui.Text(c, a.failure).TextColor(t.Danger).Role(ui.RoleAlert)
+			ui.Text(c, a.failure).Margin(0, t.Space(3)).TextColor(t.Danger).Role(ui.RoleAlert)
 		}
-		if ui.Button(c, a.tr("在主窗口打开")).Clicked() {
+		if ui.Button(c, a.tr("在主窗口打开")).Margin(0, t.Space(3)).Clicked() {
 			a.hideInlineLookup()
 			a.showAtPointer()
 		}

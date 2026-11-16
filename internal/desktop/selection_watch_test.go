@@ -16,6 +16,10 @@ func TestSelectionGesture(t *testing.T) {
 	if !gesture.release(mygo.Point{X: 30, Y: 10}, now) {
 		t.Fatal("drag was not recognized")
 	}
+	gesture.press(mygo.Point{X: 30, Y: 10})
+	if gesture.release(mygo.Point{X: 30, Y: 10}, now.Add(100*time.Millisecond)) {
+		t.Fatal("click at the end of a drag was recognized as a double click")
+	}
 	gesture.press(mygo.Point{X: 100, Y: 100})
 	if gesture.release(mygo.Point{X: 100, Y: 100}, now.Add(time.Second)) {
 		t.Fatal("single click recognized as selection")

@@ -4,10 +4,34 @@ import (
 	"context"
 	"errors"
 	"image"
+	"image/color"
+	"image/draw"
 	"testing"
 
 	"github.com/egoist/mygo/ui"
 )
+
+func TestCapturePreviewKeepsOriginalBrightness(t *testing.T) {
+	want := color.RGBA{R: 235, G: 240, B: 247, A: 255}
+	img := image.NewRGBA(image.Rect(0, 0, 200, 100))
+	draw.Draw(img, img.Bounds(), image.NewUniform(want), image.Point{}, draw.Src)
+	s := captureSelection{bitmap: ui.NewBitmap(img), pixels: img.Bounds()}
+	tt := ui.NewTester(s.view, 200, 100)
+	if got := tt.Image().RGBAAt(5, 5); got != want {
+		t.Fatalf("preview tinted before selection: %v, want %v", got, want)
+	}
+	tt.Press(20, 30)
+	tt.Move(110, 80)
+	frame := tt.Image()
+	for _, point := range []image.Point{{5, 5}, {40, 50}, {190, 90}} {
+		if got := frame.RGBAAt(point.X, point.Y); got != want {
+			t.Errorf("preview tinted at %v during selection: %v, want %v", point, got, want)
+		}
+	}
+	if frame.RGBAAt(60, 30) == want {
+		t.Error("selection outline was not drawn")
+	}
+}
 
 func TestCaptureSelection(t *testing.T) {
 	for _, test := range []struct {

@@ -23,11 +23,7 @@ func (a *App) registerShortcuts(settings core.Settings) error {
 	if maps.Equal(wanted, a.registered) {
 		return nil
 	}
-	callbacks := map[string]func(){"取词": a.selection, "显示窗口": a.showAtPointer, "OCR": func() {
-		if !a.busy && !a.systemBusy {
-			a.screenshot()
-		}
-	}, "快捷翻译": a.quickTranslate, "写作": a.startWriting}
+	callbacks := map[string]func(){"取词": a.selection, "显示窗口": a.showAtPointer, "OCR": a.screenshot, "快捷翻译": a.quickTranslate, "写作": a.startWriting}
 	for name, callback := range callbacks {
 		callbacks[name] = func() {
 			if a.recordingShortcut == "" {
@@ -171,23 +167,23 @@ func (a *App) quickTranslate() {
 func (a *App) quickView(c *ui.Context) {
 	a.applyTheme(c)
 	t := c.Theme()
-	ui.Column(c).Fill().Padding(t.Space(4)).Gap(t.Space(3)).Background(t.Background).Children(func() {
-		ui.Row(c).DragWindow().Children(func() {
+	ui.Column(c).Fill().Padding(t.Space(4), 0).Gap(t.Space(3)).Background(t.Background).Children(func() {
+		ui.Row(c).Margin(0, t.Space(4)).DragWindow().Children(func() {
 			ui.Text(c, a.tr("快捷翻译")).Bold()
 			ui.Spacer(c)
 			if iconButton(c, "clear", a.tr("关闭快捷翻译")).Clicked() {
 				a.quickWindow.Hide()
 			}
 		})
-		ui.Text(c, preview(a.text, 120)).TextColor(t.TextMuted)
-		ui.Scroll(c).Grow(1).Children(func() { ui.Text(c, a.result).Selectable() })
+		ui.Text(c, preview(a.text, 120)).Margin(0, t.Space(4)).TextColor(t.TextMuted)
+		ui.Scroll(c).Grow(1).WidthPercent(100).Padding(0, t.Space(4)).Label(a.tr("翻译结果")).Children(func() { ui.Text(c, a.result).Selectable() })
 		if a.busy {
-			ui.Spinner(c)
+			ui.Spinner(c).Margin(0, t.Space(4))
 		}
 		if a.failure != "" {
-			ui.Text(c, a.failure).TextColor(t.Danger).Role(ui.RoleAlert)
+			ui.Text(c, a.failure).Margin(0, t.Space(4)).TextColor(t.Danger).Role(ui.RoleAlert)
 		}
-		if ui.Button(c, a.tr("在主窗口打开")).Clicked() {
+		if ui.Button(c, a.tr("在主窗口打开")).Margin(0, t.Space(4)).Clicked() {
 			a.Window.Show()
 			a.Window.Focus()
 			a.page = "translator"

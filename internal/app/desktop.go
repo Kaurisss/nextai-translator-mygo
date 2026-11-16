@@ -20,7 +20,7 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-func (a *App) Open(icon []byte) {
+func (a *App) Open(windowIcon, trayIcon []byte) {
 	a.startAtLogin = a.login.OpenAtLogin()
 	a.savedStartAtLogin = a.startAtLogin
 	startedAtLogin := mygo.App.WasOpenedAtLogin()
@@ -30,7 +30,7 @@ func (a *App) Open(icon []byte) {
 		options.Vibrancy = backgroundVibrancy(a.Data.Settings.BackgroundBlur)
 	}
 	a.Window = mygo.NewWindow(options)
-	if err := a.Window.SetIcon(icon); err != nil {
+	if err := a.Window.SetIcon(windowIcon); err != nil {
 		a.failure = "设置窗口图标: " + err.Error()
 	}
 	a.post = a.Window.Update
@@ -60,7 +60,7 @@ func (a *App) Open(icon []byte) {
 	})
 	mygo.App.OnSecondInstance(func([]string, string) { a.Window.Show(); a.Window.Focus() })
 	trayMenu := a.newTrayMenu()
-	trayOptions := mygo.TrayOptions{Icon: icon, ToolTip: "NextAI Translator"}
+	trayOptions := mygo.TrayOptions{Icon: trayIcon, ToolTip: "NextAI Translator"}
 	if runtime.GOOS == "linux" {
 		trayOptions.Menu = trayMenu
 	}
@@ -155,6 +155,10 @@ func (a *App) newTrayMenu() *mygo.Menu {
 			a.Window.Focus()
 			a.start()
 		}},
+		{ID: "ocr", Label: a.tr("截图翻译"), Disabled: runtime.GOOS != "linux" && (a.busy || a.systemBusy),
+			Click: func(*mygo.MenuItem, *mygo.Window) { a.screenshot() }},
+		{ID: "pin", Label: a.tr("置顶"), Type: mygo.MenuItemCheckbox, Checked: a.pinned,
+			Click: func(*mygo.MenuItem, *mygo.Window) { a.togglePinned() }},
 	}
 	if a.latestVersion != "" {
 		items = append(items, &mygo.MenuItem{Label: a.tr("有新版本可用！") + " " + a.latestVersion, Click: func(*mygo.MenuItem, *mygo.Window) {
@@ -167,6 +171,14 @@ func (a *App) newTrayMenu() *mygo.Menu {
 	}
 	items = append(items, mygo.Separator(), &mygo.MenuItem{Role: mygo.RoleQuit})
 	return mygo.NewMenu(items)
+}
+
+func (a *App) togglePinned() {
+	a.pinned = !a.pinned
+	if a.Window != nil {
+		a.Window.SetAlwaysOnTop(a.pinned)
+	}
+	a.refreshTray()
 }
 
 func (a *App) refreshTray() {
@@ -451,14 +463,13 @@ func (a *App) dropImage(paths []string) {
 }
 
 func (a *App) screenshot() {
+	if a.busy || a.systemBusy || a.Window == nil {
+		return
+	}
 	a.systemBusy = true
 	a.failure = ""
-	visible := a.Window.IsVisible()
-	a.Window.Hide()
+	windows := []*mygo.Window{a.Window, a.inlineWindow, a.quickWindow, a.selectionIcon}
 	go func() {
-		if visible {
-			time.Sleep(150 * time.Millisecond)
-		}
 		dir, err := os.MkdirTemp("", "nextai-capture-")
 		if err != nil {
 			a.update(func() { a.systemBusy = false; a.Window.Show(); a.failure = err.Error() })
@@ -468,7 +479,7 @@ func (a *App) screenshot() {
 		path := filepath.Join(dir, "capture.png")
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
-		if err := desktop.Capture(ctx, path); err != nil {
+		if err := desktop.Capture(ctx, path, windows...); err != nil {
 			a.update(func() {
 				a.systemBusy = false
 				a.Window.Show()

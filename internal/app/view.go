@@ -45,7 +45,7 @@ func (a *App) View(c *ui.Context) {
 			case "settings":
 				a.settings(c)
 			default:
-				ui.Column(c).Fill().Padding(t.Space(4)).Gap(t.Space(3)).Children(func() {
+				ui.Column(c).Fill().Padding(t.Space(4), 0).Gap(t.Space(3)).Children(func() {
 					switch a.page {
 					case "history":
 						a.history(c)
@@ -116,6 +116,7 @@ func (a *App) applyTheme(c *ui.Context) {
 	}
 	theme.Accent, theme.AccentText, theme.Focus = theme.Text, theme.Background, theme.Text
 	theme.AccentHover, theme.AccentPressed = theme.TextMuted, theme.Text
+	theme.ScrollbarStyle.TrackWidth, theme.ScrollbarStyle.ThumbWidth = 8, 8
 	c.SetTheme(&theme)
 }
 
@@ -142,17 +143,32 @@ func (a *App) translator(c *ui.Context) {
 		a.languagePicker(c, &a.Data.Settings.Target, core.Languages, a.tr("目标语言"))
 		a.actionToolbar(c)
 	})
-	ui.Column(c).Grow(1).WidthPercent(100).Padding(t.Space(8), t.Space(5), t.Space(2)).Children(func() {
+	ui.Column(c).Grow(1).WidthPercent(100).Padding(t.Space(8), 0, t.Space(2)).Children(func() {
 		input := func() {
 			ui.Column(c).Fill().Gap(t.Space(1)).Children(func() {
 				c.Key("source-text")
-				editor := ui.TextArea(c, &a.text).Label(a.tr("原文输入")).AutoFocus().ReadOnly(a.busy).Grow(1).WidthPercent(100).Padding(t.Space(3)).Radius(t.Space(2)).Background(t.Surface).OnTextKey(func(k ui.TextKey) bool {
+				inset, radius := t.Space(5), t.Space(2)
+				editor := ui.TextArea(c, &a.text).Label(a.tr("原文输入")).AutoFocus().ReadOnly(a.busy).Grow(1).WidthPercent(100).
+					Padding(t.Space(3), inset+t.Space(3)).Background(ui.Transparent).Border(0, ui.Transparent).FocusRing(false).OnTextKey(func(k ui.TextKey) bool {
 					if k.Key == ui.KeyEnter && k.Mods == 0 {
 						a.text = k.Text()
 						a.start()
 						return true
 					}
 					return false
+				})
+				border := t.Border
+				if editor.Focused() {
+					border = t.Accent
+				} else if editor.Hovered() {
+					border = t.Border.Mix(t.Text, 0.25)
+				}
+				// Inset the visible field; the editor still spans the window so its scroll bar reaches the edge.
+				editor.Draw(func(p *ui.Painter, r ui.Rect) {
+					r.X += inset
+					r.W -= 2 * inset
+					p.Fill(r, t.Surface, radius)
+					p.Stroke(r, border, radius, 1)
 				})
 				if a.Data.Settings.FontSize > 0 {
 					editor.FontSize(float32(a.Data.Settings.FontSize))
@@ -179,7 +195,7 @@ func (a *App) translator(c *ui.Context) {
 					}
 				}
 				if strings.TrimSpace(a.text) != "" || a.busy {
-					ui.Row(c).Gap(t.Space(2)).AlignItems(ui.Center).Children(func() {
+					ui.Row(c).Margin(0, t.Space(5)).Gap(t.Space(2)).AlignItems(ui.Center).Children(func() {
 						ui.Text(c, fmt.Sprint(utf8.RuneCountInString(a.text))).FontSize(max(12, t.Rem(12.0/14))).TextColor(t.TextMuted)
 						ui.Spacer(c)
 						ui.Text(c, a.tr("Enter 提交，Shift+Enter 换行")).FontSize(max(12, t.Rem(12.0/14))).TextColor(t.TextMuted).SingleLine()
@@ -214,15 +230,15 @@ func (a *App) translator(c *ui.Context) {
 					if a.busy || a.systemBusy {
 						ui.Spinner(c).Label(a.tr("正在处理"))
 					}
-				}).Label(a.tr("原文工具"))
+				}).Label(a.tr("原文工具")).Margin(0, t.Space(5))
 			})
 		}
 		output := func() {
 			a.md.Theme = &markdown.Theme{FontSize: float32(a.Data.Settings.FontSize)}
 			ui.Column(c).Fill().Gap(t.Space(2)).Padding(t.Space(3), 0, 0, 0).Children(func() {
-				ui.Scroll(c).Grow(1).WidthPercent(100).Label(a.tr("翻译结果")).Busy(a.busy).Children(func() {
+				ui.Scroll(c).Grow(1).WidthPercent(100).Padding(0, t.Space(5)).Label(a.tr("翻译结果")).Busy(a.busy).Children(func() {
 					if a.resultFormat == "纯文本" {
-						result := ui.TextArea(c, &a.result).ReadOnly(true).Label(a.tr("纯文本结果")).WidthPercent(100).Lines(12, 32)
+						result := ui.Text(c, a.result).Selectable().Label(a.tr("纯文本结果")).WidthPercent(100)
 						if a.Data.Settings.FontSize > 0 {
 							result.FontSize(float32(a.Data.Settings.FontSize))
 						}
@@ -251,7 +267,7 @@ func (a *App) translator(c *ui.Context) {
 						if iconButton(c, "insert", a.tr("写回")).Disabled(a.busy || a.systemBusy || a.previousWindow == 0).Clicked() {
 							a.insert()
 						}
-					}).Label(a.tr("结果工具"))
+					}).Label(a.tr("结果工具")).Margin(0, t.Space(5))
 				}
 			})
 		}
@@ -318,10 +334,7 @@ func (a *App) actionToolbar(c *ui.Context) {
 				a.screenshot()
 			}
 			if m.Item(a.tr("置顶")).Checked(a.pinned).Chosen() {
-				a.pinned = !a.pinned
-				if a.Window != nil {
-					a.Window.SetAlwaysOnTop(a.pinned)
-				}
+				a.togglePinned()
 			}
 			m.Separator()
 			if m.Item(a.tr("生词本")).Chosen() {
@@ -389,8 +402,8 @@ func (a *App) history(c *ui.Context) {
 		if iconTextButton(c, "export", a.tr("导出记录"), "", false).Clicked() {
 			a.export("history")
 		}
-	}).Label(a.tr("历史记录工具"))
-	ui.SearchField(c, &a.search).Label(a.tr("搜索记录")).Placeholder(a.tr("搜索原文或译文"))
+	}).Label(a.tr("历史记录工具")).Margin(0, t.Space(4))
+	ui.SearchField(c, &a.search).Margin(0, t.Space(4)).Label(a.tr("搜索记录")).Placeholder(a.tr("搜索原文或译文"))
 	var rows []int
 	for i, r := range a.Data.History {
 		if match(a.search, r.Text, r.Result) && (!a.favoritesOnly || r.Favorite) {
@@ -404,7 +417,7 @@ func (a *App) history(c *ui.Context) {
 		ui.List(c, nil, len(rows), func(n int) {
 			i := rows[n]
 			r := a.Data.History[i]
-			ui.Column(c).Key(r.ID).Padding(t.Space(3)).Gap(t.Space(2)).BorderWidth(0, 0, 1, 0).BorderColor(t.Border).Children(func() {
+			ui.Column(c).Key(r.ID).Padding(t.Space(3), t.Space(7)).Gap(t.Space(2)).BorderWidth(0, 0, 1, 0).BorderColor(t.Border).Children(func() {
 				ui.Text(c, preview(r.Text, 140)).Bold()
 				ui.Text(c, preview(r.Result, 240)).TextColor(t.TextMuted)
 				ui.Toolbar(c, func() {
@@ -421,7 +434,7 @@ func (a *App) history(c *ui.Context) {
 					}
 				}).Label(a.tr("记录操作"))
 			})
-		}).Grow(1)
+		}).Grow(1).WidthPercent(100).Label(a.tr("历史记录"))
 	}
 	if remove >= 0 {
 		removed := a.Data.History[remove]
@@ -457,8 +470,8 @@ func (a *App) vocabulary(c *ui.Context) {
 		if iconTextButton(c, "export", a.tr("导出生词"), "", false).Clicked() {
 			a.export("vocabulary")
 		}
-	}).Label(a.tr("生词本工具"))
-	ui.SearchField(c, &a.search).Label(a.tr("搜索生词")).Placeholder(a.tr("搜索单词或释义"))
+	}).Label(a.tr("生词本工具")).Margin(0, t.Space(4))
+	ui.SearchField(c, &a.search).Margin(0, t.Space(4)).Label(a.tr("搜索生词")).Placeholder(a.tr("搜索单词或释义"))
 	var rows []int
 	for i, w := range a.Data.Vocabulary {
 		if match(a.search, w.Text, w.Description) {
@@ -472,7 +485,7 @@ func (a *App) vocabulary(c *ui.Context) {
 		ui.List(c, nil, len(rows), func(n int) {
 			i := rows[n]
 			w := a.Data.Vocabulary[i]
-			ui.Column(c).Key(w.Text).Padding(t.Space(3)).Gap(t.Space(2)).BorderWidth(0, 0, 1, 0).BorderColor(t.Border).Children(func() {
+			ui.Column(c).Key(w.Text).Padding(t.Space(3), t.Space(7)).Gap(t.Space(2)).BorderWidth(0, 0, 1, 0).BorderColor(t.Border).Children(func() {
 				ui.Text(c, preview(w.Text, 120)).Bold()
 				ui.Text(c, preview(w.Description, 220)).TextColor(t.TextMuted)
 				ui.Toolbar(c, func() {
@@ -495,7 +508,7 @@ func (a *App) vocabulary(c *ui.Context) {
 					}
 				}).Label(a.tr("生词操作"))
 			})
-		}).Grow(1)
+		}).Grow(1).WidthPercent(100).Label(a.tr("生词本"))
 	}
 	if remove >= 0 {
 		removed := a.Data.Vocabulary[remove]
@@ -591,8 +604,8 @@ func (a *App) actions(c *ui.Context) {
 			a.page = "translator"
 		}
 		ui.Text(c, a.tr("动作管理")).FontSize(t.Rem(1.4)).Bold()
-	}).Label(a.tr("动作管理导航"))
-	ui.Scroll(c).Grow(1).Children(func() {
+	}).Label(a.tr("动作管理导航")).Margin(0, t.Space(4))
+	ui.Scroll(c).Grow(1).WidthPercent(100).Padding(0, t.Space(4)).Label(a.tr("动作管理")).Children(func() {
 		ui.Column(c).Gap(t.Space(4)).Children(func() {
 			ui.Form(c, func() {
 				ui.Field(c, a.tr("动作"), func() {

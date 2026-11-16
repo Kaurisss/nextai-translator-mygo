@@ -14,21 +14,25 @@ import (
 var (
 	loadMouseState sync.Once
 	mouseState     func(int32, uint32) bool
+	keyState       func(int32, uint16) bool
 	mouseStateErr  error
 )
 
-func mouseButtonReader() (func() bool, error) {
+func selectionInputReader() (func() selectionInput, error) {
 	loadMouseState.Do(func() {
 		var library uintptr
 		library, mouseStateErr = purego.Dlopen("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics", purego.RTLD_NOW)
 		if mouseStateErr == nil {
 			purego.RegisterLibFunc(&mouseState, library, "CGEventSourceButtonState")
+			purego.RegisterLibFunc(&keyState, library, "CGEventSourceKeyState")
 		}
 	})
 	if mouseStateErr != nil {
 		return nil, mouseStateErr
 	}
-	return func() bool { return mouseState(0, 0) }, nil
+	return func() selectionInput {
+		return selectionInput{left: mouseState(0, 0), right: mouseState(0, 1), key: keyState(0, 53)} // Escape
+	}, nil
 }
 
 func selectionWindowAt(Point) uintptr { return 0 }

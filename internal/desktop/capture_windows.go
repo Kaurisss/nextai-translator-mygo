@@ -15,12 +15,12 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-func Capture(ctx context.Context, path string) error {
+func Capture(ctx context.Context, path string, windows ...*mygo.Window) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
 	display := mygo.Screen.DisplayNearestPoint(mygo.Screen.CursorScreenPoint())
-	screenshot, err := captureDisplay(uintptr(display.ID))
+	screenshot, err := captureAfterHiding(ctx, uintptr(display.ID), windows)
 	if err != nil {
 		return err
 	}
@@ -59,6 +59,39 @@ func Capture(ctx context.Context, path string) error {
 	}
 }
 
+func captureAfterHiding(ctx context.Context, monitor uintptr, windows []*mygo.Window) (*image.RGBA, error) {
+	dwm := syscall.NewLazyDLL("dwmapi.dll")
+	setAttribute := dwm.NewProc("DwmSetWindowAttribute")
+	const transitionsDisabled = 3 // DWMWA_TRANSITIONS_FORCEDISABLED
+	var restoreTransitions []uintptr
+	mygo.RunOnMain(func() {
+		for _, w := range windows {
+			if w == nil || !w.IsVisible() {
+				continue
+			}
+			hwnd := w.NativeHandle()
+			disabled := int32(1)
+			hr, _, _ := setAttribute.Call(hwnd, transitionsDisabled, uintptr(unsafe.Pointer(&disabled)), 4)
+			if hr == 0 {
+				restoreTransitions = append(restoreTransitions, hwnd)
+			}
+			w.Hide()
+		}
+	})
+	defer func() {
+		enabled := int32(0)
+		for _, hwnd := range restoreTransitions {
+			setAttribute.Call(hwnd, transitionsDisabled, uintptr(unsafe.Pointer(&enabled)), 4)
+		}
+	}()
+	// Wait for a new desktop frame after hiding the windows.
+	dwm.NewProc("DwmFlush").Call()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	return captureDisplay(monitor)
+}
+
 type captureSelection struct {
 	bitmap                     *ui.Bitmap
 	pixels                     image.Rectangle
@@ -79,19 +112,10 @@ func (s *captureSelection) view(c *ui.Context) {
 	ui.Box(c).Fill().Label("截图选区").Focusable().Cursor(ui.CursorCrosshair).HandleInput(s.input).Draw(func(p *ui.Painter, r ui.Rect) {
 		s.width, s.height = r.W, r.H
 		p.Image(s.bitmap, r, ui.FillBox)
-		selected := ui.Rect{X: min(s.startX, s.endX), Y: min(s.startY, s.endY), W: max(s.startX, s.endX) - min(s.startX, s.endX), H: max(s.startY, s.endY) - min(s.startY, s.endY)}
-		shade := ui.RGBA(0, 0, 0, 0.4)
-		if !s.dragging {
-			p.Fill(r, shade, 0)
-			return
+		if s.dragging {
+			selected := ui.Rect{X: r.X + min(s.startX, s.endX), Y: r.Y + min(s.startY, s.endY), W: max(s.startX, s.endX) - min(s.startX, s.endX), H: max(s.startY, s.endY) - min(s.startY, s.endY)}
+			p.Stroke(selected, ui.RGB(32, 128, 240), 0, 1)
 		}
-		p.Fill(ui.Rect{X: r.X, Y: r.Y, W: r.W, H: selected.Y}, shade, 0)
-		p.Fill(ui.Rect{X: r.X, Y: r.Y + selected.Y + selected.H, W: r.W, H: r.H - selected.Y - selected.H}, shade, 0)
-		p.Fill(ui.Rect{X: r.X, Y: r.Y + selected.Y, W: selected.X, H: selected.H}, shade, 0)
-		p.Fill(ui.Rect{X: r.X + selected.X + selected.W, Y: r.Y + selected.Y, W: r.W - selected.X - selected.W, H: selected.H}, shade, 0)
-		selected.X += r.X
-		selected.Y += r.Y
-		p.Stroke(selected, ui.RGB(32, 128, 240), 0, 1)
 	})
 	if c.Shortcut(0, ui.KeyEscape) {
 		s.finish(image.Rectangle{})
