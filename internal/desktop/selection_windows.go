@@ -49,6 +49,10 @@ func selectionWindowAt(point Point) uintptr {
 		return 0
 	}
 	defer restore()
+	return selectionWindowAtOnThread(point)
+}
+
+func selectionWindowAtOnThread(point Point) uintptr {
 	if previous, _, _ := selectionDPI.Call(^uintptr(3)); previous != 0 {
 		defer selectionDPI.Call(previous)
 	}
@@ -130,7 +134,7 @@ func (s Selection) Read(ctx context.Context, allowInput bool) (string, uintptr, 
 		return "", 0, nil
 	}
 	defer restore()
-	if s.window == 0 || ActiveWindow() != s.window || selectionWindowAt(s.point) != s.window {
+	if s.window == 0 || ActiveWindow() != s.window || selectionWindowAtOnThread(s.point) != s.window {
 		return "", 0, nil
 	}
 	if err := ctx.Err(); err != nil {

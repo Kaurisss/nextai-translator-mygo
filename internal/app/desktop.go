@@ -85,8 +85,20 @@ func (a *App) Open(windowIcon, trayIcon []byte) {
 		}
 	}
 	if a.Data.Settings.ShowSelectionIcon || a.Data.Settings.AutoTranslate {
-		if err := a.setSelectionWatch(true); err != nil {
-			a.failure = "启用划词: " + err.Error()
+		enableSelectionWatch := func() {
+			if a.quitting || a.stopSelectionWatch != nil {
+				return
+			}
+			if err := a.setSelectionWatch(true); err != nil {
+				a.failure = "启用划词: " + err.Error()
+			}
+		}
+		if runtime.GOOS == "windows" && startedAtLogin {
+			time.AfterFunc(time.Second, func() {
+				a.update(enableSelectionWatch)
+			})
+		} else {
+			enableSelectionWatch()
 		}
 	}
 }
