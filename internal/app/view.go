@@ -86,6 +86,9 @@ func (a *App) View(c *ui.Context) {
 	if shortcutsEnabled && c.Shortcut(ui.Cmd|ui.Shift, ui.KeyEnter) && a.result != "" && a.previousWindow != 0 {
 		a.insert()
 	}
+	if a.page != "translator" && (a.wordHover.activeKey != "" || a.wordHover.pendingKey != "") {
+		a.clearWordHover()
+	}
 	if a.Window != nil && a.appliedAppearance != a.Data.Settings.Appearance {
 		source := mygo.ThemeSystem
 		if a.Data.Settings.Appearance == "浅色" {
@@ -223,6 +226,7 @@ func (a *App) translator(c *ui.Context) {
 					ui.Spacer(c)
 					if a.text != "" && iconButton(c, "clear", a.tr("清空")).Disabled(a.busy).Clicked() {
 						a.hideInlineLookup()
+						a.clearWordHover()
 						a.text = ""
 						a.result = ""
 						a.notice = ""
@@ -236,18 +240,7 @@ func (a *App) translator(c *ui.Context) {
 		output := func() {
 			a.md.Theme = &markdown.Theme{FontSize: float32(a.Data.Settings.FontSize)}
 			ui.Column(c).Fill().Gap(t.Space(2)).Padding(t.Space(3), 0, 0, 0).Children(func() {
-				ui.Scroll(c).Grow(1).WidthPercent(100).Padding(0, t.Space(5)).Label(a.tr("翻译结果")).Busy(a.busy).Children(func() {
-					if a.resultFormat == "纯文本" {
-						result := ui.Text(c, a.result).Selectable().Label(a.tr("纯文本结果")).WidthPercent(100)
-						if a.Data.Settings.FontSize > 0 {
-							result.FontSize(float32(a.Data.Settings.FontSize))
-						}
-					} else if a.busy {
-						markdown.Stream(c, markdownHardBreaks(a.result), &a.md)
-					} else {
-						markdown.View(c, markdownHardBreaks(a.result), &a.md)
-					}
-				})
+				a.renderTranslatorResult(c)
 				if a.result != "" {
 					ui.Toolbar(c, func() {
 						ui.Spacer(c)

@@ -93,6 +93,7 @@ type App struct {
 	selectedWindow                                      uintptr
 	showAPIKey, showProxyPassword                       bool
 	speechStatus                                        string
+	wordHover                                           wordHoverState
 }
 
 func New(d core.Data, s core.Store) *App {
@@ -196,6 +197,7 @@ func (a *App) start() {
 		return
 	}
 	a.hideInlineLookup()
+	a.clearWordHover()
 	if a.client == nil {
 		a.failure = "请先修正并保存代理设置"
 		return
@@ -325,6 +327,7 @@ func (a *App) addWord(c *ui.Context) {
 
 func (a *App) restore(r core.Record) {
 	a.stop()
+	a.clearWordHover()
 	a.notice = ""
 	a.failure = ""
 	a.text = r.Text
