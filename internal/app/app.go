@@ -58,6 +58,11 @@ type App struct {
 	advancedAction                                      bool
 	appliedAppearance                                   string
 	latestVersion                                       string
+	latestAsset                                         releaseAsset
+	latestAssetOK                                       bool
+	checkingUpdate, updating, updateInstalling          bool
+	updatePercent                                       int
+	updateStatus                                        string
 	settingsDraft                                       core.Settings
 	settingsTab                                         int
 	client                                              *http.Client

@@ -172,13 +172,13 @@ func (a *App) newTrayMenu() *mygo.Menu {
 		{ID: "pin", Label: a.tr("置顶"), Type: mygo.MenuItemCheckbox, Checked: a.pinned,
 			Click: func(*mygo.MenuItem, *mygo.Window) { a.togglePinned() }},
 	}
-	if a.latestVersion != "" {
-		items = append(items, &mygo.MenuItem{Label: a.tr("有新版本可用！") + " " + a.latestVersion, Click: func(*mygo.MenuItem, *mygo.Window) {
-			go func() {
-				if err := mygo.Shell.OpenExternal("https://github.com/Kaurisss/nextai-translator-mygo/releases/latest"); err != nil {
-					a.update(func() { a.failure = err.Error(); a.Window.Show() })
-				}
-			}()
+	if label := a.updateLabel(); label != "" {
+		items = append(items, &mygo.MenuItem{ID: "update", Label: label, Disabled: a.updating, Click: func(*mygo.MenuItem, *mygo.Window) {
+			if a.Window != nil {
+				a.Window.Show()
+				a.Window.Focus()
+			}
+			a.installLatest()
 		}})
 	}
 	items = append(items, mygo.Separator(), &mygo.MenuItem{Role: mygo.RoleQuit})
@@ -322,7 +322,10 @@ func (a *App) saveSettings() {
 			a.client = client
 			a.Engine = core.Engine{Client: client}
 			if !settings.AutoCheckUpdates {
-				a.latestVersion = ""
+				if !a.updating {
+					a.latestVersion = ""
+					a.latestAsset, a.latestAssetOK = releaseAsset{}, false
+				}
 			} else if checkUpdates {
 				a.checkForUpdates()
 			}

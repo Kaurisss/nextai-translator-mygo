@@ -369,8 +369,14 @@ func (a *App) footer(c *ui.Context) {
 			}
 		}
 		ui.Text(c, profile.Provider+"  "+profile.Model).FontSize(max(12, t.Rem(12.0/14))).TextColor(t.TextMuted).SingleLine().Grow(1)
-		if a.latestVersion != "" {
-			ui.Link(c, a.tr("有新版本可用！")+" "+a.latestVersion, "https://github.com/Kaurisss/nextai-translator-mygo/releases/latest").SingleLine()
+		if label := a.updateLabel(); label != "" {
+			button := ui.Button(c, "").Label(label).Tooltip(label).Height(t.Space(7)).Padding(0, t.Space(2)).Radius(t.Radius).Disabled(a.updating)
+			button.Children(func() {
+				ui.Text(c, label).FontSize(max(12, t.Rem(12.0/14))).SingleLine()
+			})
+			if button.Clicked() {
+				a.installLatest()
+			}
 		}
 		if iconButton(c, "history", a.tr("历史记录")).Clicked() {
 			if a.page == "history" {

@@ -277,6 +277,26 @@ func (a *App) generalSettings(c *ui.Context) {
 	}
 	ui.Checkbox(c, &s.CompactLookup, a.tr("紧凑划词模式")).Label(a.tr("紧凑划词模式"))
 	ui.Checkbox(c, &s.AutoCheckUpdates, a.tr("自动检查更新")).Label(a.tr("自动检查更新"))
+	ui.Row(c).Gap(c.Theme().Space(2)).AlignItems(ui.Center).Children(func() {
+		if iconTextButton(c, "refresh", a.tr("检查更新"), "", false).Disabled(a.checkingUpdate || a.updating).Clicked() {
+			a.checkForUpdatesManual()
+		}
+		if a.latestVersion != "" || a.updating {
+			label := a.updateLabel()
+			if !a.updating {
+				label = a.tr("立即更新") + " " + a.latestVersion
+			}
+			if ui.PrimaryButton(c, label).Label(label).Disabled(a.updating).Clicked() {
+				a.installLatest()
+			}
+		}
+		if a.checkingUpdate {
+			ui.Spinner(c)
+		}
+	})
+	if a.updateStatus != "" && !a.updating && a.latestVersion == "" {
+		ui.Text(c, a.updateStatus).Role(ui.RoleStatus)
+	}
 	ui.Toolbar(c, func() {
 		if iconTextButton(c, "export", a.tr("导出备份"), "", false).Disabled(a.systemBusy).Clicked() {
 			a.export("backup")
