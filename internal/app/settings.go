@@ -231,7 +231,7 @@ func (a *App) generalSettings(c *ui.Context) {
 		})
 	}
 	settingsField(c, a.tr("默认动作"), "", func() ui.Element {
-		return a.selectSetting(c, &s.DefaultAction, a.actionNames()).Label(a.tr("默认动作"))
+		return a.selectSetting(c, &s.DefaultAction, append([]string{"Nop"}, a.actionNames()...)).Label(a.tr("默认动作"))
 	})
 	settingsField(c, a.tr("默认目标语言"), "", func() ui.Element {
 		return a.languagePicker(c, &s.DefaultTarget, core.Languages, a.tr("默认目标语言"))
@@ -276,6 +276,8 @@ func (a *App) generalSettings(c *ui.Context) {
 		ui.Checkbox(c, &s.SelectInputText, a.tr("输入框划词")).Label(a.tr("输入框划词")).Disabled(!s.ShowSelectionIcon && !s.AutoTranslate)
 	}
 	ui.Checkbox(c, &s.CompactLookup, a.tr("紧凑划词模式")).Label(a.tr("紧凑划词模式"))
+	ui.Checkbox(c, &s.AllowClipboardFallback, a.tr("当无法获得选中文本时允许使用剪贴板来获取选中文本")).Label(a.tr("使用剪贴板"))
+	ui.Checkbox(c, &s.AutoCollect, a.tr("自动加入收藏")).Label(a.tr("自动加入收藏"))
 	ui.Checkbox(c, &s.AutoCheckUpdates, a.tr("自动检查更新")).Label(a.tr("自动检查更新"))
 	ui.Row(c).Gap(c.Theme().Space(2)).AlignItems(ui.Center).Children(func() {
 		if iconTextButton(c, "refresh", a.tr("检查更新"), "", false).Disabled(a.checkingUpdate || a.updating).Clicked() {

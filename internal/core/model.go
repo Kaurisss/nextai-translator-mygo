@@ -34,11 +34,13 @@ type Settings struct {
 	FixedPosition     bool               `json:"fixedPosition"`
 	LanguageDetection string             `json:"languageDetection,omitempty"`
 	AutoCheckUpdates  bool               `json:"autoCheckUpdates"`
-	CompactLookup     bool               `json:"compactLookup,omitempty"`
-	ShowSelectionIcon bool               `json:"showSelectionIcon,omitempty"`
-	AutoTranslate     bool               `json:"autoTranslate,omitempty"`
-	SelectInputText   bool               `json:"selectInputText"`
-	DefaultAction     string             `json:"defaultAction,omitempty"`
+	CompactLookup          bool               `json:"compactLookup,omitempty"`
+	ShowSelectionIcon      bool               `json:"showSelectionIcon,omitempty"`
+	AutoTranslate          bool               `json:"autoTranslate,omitempty"`
+	SelectInputText        bool               `json:"selectInputText"`
+	AllowClipboardFallback bool               `json:"allowClipboardFallback,omitempty"`
+	AutoCollect            bool               `json:"autoCollect,omitempty"`
+	DefaultAction          string             `json:"defaultAction,omitempty"`
 	DefaultTarget     string             `json:"defaultTarget,omitempty"`
 	DisplayShortcut   string             `json:"displayShortcut,omitempty"`
 	OCRShortcut       string             `json:"ocrShortcut,omitempty"`

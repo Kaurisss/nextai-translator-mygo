@@ -93,6 +93,8 @@ type App struct {
 	selectedWindow                                      uintptr
 	showAPIKey, showProxyPassword                       bool
 	speechStatus                                        string
+	inlineSpeechKey                                     string
+	resultWordMode                                      bool
 	wordHover                                           wordHoverState
 }
 
@@ -247,6 +249,8 @@ func (a *App) start() {
 		q.Source = "自动检测"
 	}
 	a.resultFormat = action.Format
+	wordMode := !writing && action.Mode == "translate" && core.IsWord(q.Source, q.Text)
+	a.resultWordMode = wordMode
 	ctx, cancel := context.WithCancel(context.Background())
 	a.cancel = cancel
 	a.generation++
@@ -286,6 +290,9 @@ func (a *App) start() {
 			}
 			a.result = result
 			a.Data.History = append([]core.Record{{ID: fmt.Sprint(time.Now().UnixNano()), Text: q.Text, Result: result, Source: source, Target: q.Target, Action: q.Action.Name, Provider: q.Profile.Provider, Model: q.Profile.Model, Format: q.Action.Format, CreatedAt: time.Now()}}, a.Data.History...)
+			if a.Data.Settings.AutoCollect && wordMode {
+				a.collectWord(q.Text, result)
+			}
 			if a.save() {
 				a.notice = "已完成并保存到历史记录"
 			}
@@ -308,18 +315,29 @@ func (a *App) stop() {
 	a.notice = "已停止"
 }
 
+func (a *App) collectWord(text, description string) bool {
+	word := strings.TrimSpace(text)
+	if word == "" || description == "" {
+		return false
+	}
+	for _, w := range a.Data.Vocabulary {
+		if w.Text == word {
+			return false
+		}
+	}
+	a.Data.Vocabulary = append([]core.Word{{Text: word, Description: description, CreatedAt: time.Now()}}, a.Data.Vocabulary...)
+	return true
+}
+
 func (a *App) addWord(c *ui.Context) {
 	word := strings.TrimSpace(a.text)
 	if word == "" || a.result == "" {
 		return
 	}
-	for _, w := range a.Data.Vocabulary {
-		if w.Text == word {
-			c.Toast(a.tr("生词本已包含此条目"))
-			return
-		}
+	if !a.collectWord(word, a.result) {
+		c.Toast(a.tr("生词本已包含此条目"))
+		return
 	}
-	a.Data.Vocabulary = append([]core.Word{{Text: word, Description: a.result, CreatedAt: time.Now()}}, a.Data.Vocabulary...)
 	if a.save() {
 		c.Toast(a.tr("已加入生词本"))
 	}
@@ -333,6 +351,7 @@ func (a *App) restore(r core.Record) {
 	a.text = r.Text
 	a.result = r.Result
 	a.resultFormat = r.Format
+	a.resultWordMode = core.IsWord(r.Source, r.Text)
 	a.Data.Settings.Source = r.Source
 	a.Data.Settings.Target = r.Target
 	for _, v := range a.Data.Actions {

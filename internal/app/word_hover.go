@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/Kaurisss/nextai-translator-mygo/internal/core"
 	"github.com/egoist/mygo/ui"
@@ -18,8 +19,11 @@ const (
 	wordHoverHideDelay = 150 * time.Millisecond
 )
 
-// lookupWordFunc is overridable in tests.
-var lookupWordFunc = core.LookupEnglishWord
+// Test hooks for dictionary lookup and inline speech playback.
+var (
+	lookupWordFunc   = core.LookupEnglishWord
+	inlineSpeechHook func(a *App, text, language string)
+)
 
 type wordHoverState struct {
 	activeKey    string
@@ -51,6 +55,22 @@ type hoverInlineStyle struct {
 	italic bool
 	strike bool
 	inLink bool
+}
+
+type drawnSpeaker struct {
+	at    int
+	icon  *ui.SVG
+	color ui.Color
+}
+
+type inlineParaBuilder struct {
+	blockIdx int
+	seq      int
+	runes    int
+	numbered bool
+	fallback string
+	text     strings.Builder
+	speakers []drawnSpeaker
 }
 
 func (a *App) clearWordHover() {
@@ -161,8 +181,34 @@ func (a *App) openWordDetails(word string) {
 	a.start()
 }
 
+func (a *App) inlineSpeechLanguage() string {
+	if a.resultWordMode {
+		return a.Data.Settings.Source
+	}
+	return a.Data.Settings.Target
+}
+
+func (a *App) toggleInlineSpeech(key, text string) {
+	if a.speaking && a.inlineSpeechKey == key {
+		a.stopSpeaking()
+		return
+	}
+	lang := a.inlineSpeechLanguage()
+	if inlineSpeechHook != nil {
+		a.speaking = true
+		a.inlineSpeechKey = key
+		inlineSpeechHook(a, text, lang)
+		return
+	}
+	a.speakText(text, lang, a.Data.Settings.Speech)
+	if a.speaking {
+		a.inlineSpeechKey = key
+	}
+}
+
 // renderTranslatorResult renders the translation result area with per-word
-// hover dictionary support when not streaming, and shows the active hover card.
+// hover dictionary and inline phonetic/example speech buttons when not
+// streaming, and shows the active hover card.
 func (a *App) renderTranslatorResult(c *ui.Context) {
 	t := c.Theme()
 	var hoveredAnchor, activeAnchor ui.Element
@@ -177,7 +223,7 @@ func (a *App) renderTranslatorResult(c *ui.Context) {
 
 	ui.Scroll(c).Grow(1).WidthPercent(100).Padding(0, t.Space(5)).Label(a.tr("翻译结果")).Busy(a.busy).Children(func() {
 		if a.resultFormat == "纯文本" {
-			if hoverEnabled && core.HasEnglishWord(a.result) {
+			if hoverEnabled && (core.HasEnglishWord(a.result) || core.HasPhoneticOrExample(a.result, false)) {
 				a.renderHoverPlainText(c, a.result, &hf)
 			} else {
 				result := ui.Text(c, a.result).Selectable().Label(a.tr("纯文本结果")).WidthPercent(100)
@@ -276,10 +322,11 @@ func (a *App) renderHoverPlainText(c *ui.Context, text string, hf *hoverFrame) {
 	if a.Data.Settings.FontSize > 0 {
 		el.FontSize(float32(a.Data.Settings.FontSize))
 	}
-	seq := 0
+	pb := inlineParaBuilder{blockIdx: 0, fallback: a.text}
 	el.Children(func() {
-		a.renderHoverTextPieces(c, text, hoverInlineStyle{}, th, 0, &seq, hf)
+		a.renderPhoneticText(c, text, hoverInlineStyle{}, th, &pb, hf)
 	})
+	attachInlineSpeakers(el, pb.speakers)
 }
 
 func (a *App) markdownTheme(c *ui.Context) *markdown.Theme {
@@ -290,13 +337,40 @@ func (a *App) markdownTheme(c *ui.Context) *markdown.Theme {
 	return th
 }
 
+func isOrderedListParagraph(d *parser.Document, i int) bool {
+	b := d.Block(i)
+	if b.Parent < 0 {
+		return false
+	}
+	parent := d.Block(b.Parent)
+	if parent.Kind != parser.Item || parent.Parent < 0 {
+		return false
+	}
+	list := d.Block(parent.Parent)
+	return list.Kind == parser.List && list.Ordered
+}
+
+func blockSpeechFallback(d *parser.Document, i int, defaultFallback string) string {
+	for prev := i - 1; prev >= 1; prev-- {
+		k := d.Block(prev).Kind
+		if k == parser.Paragraph || k == parser.Heading {
+			if text := strings.TrimSpace(parser.PlainText(d.Inlines(prev))); text != "" {
+				return text
+			}
+			break
+		}
+	}
+	return defaultFallback
+}
+
 func (a *App) renderHoverMarkdownBlock(c *ui.Context, d *parser.Document, i int, hf *hoverFrame) bool {
 	b := d.Block(i)
 	if b.Kind != parser.Paragraph && b.Kind != parser.Heading {
 		return false
 	}
 	inlines := d.Inlines(i)
-	if len(inlines) == 0 || isImagesOnlyInlines(inlines) || !hasHoverableWordInInlines(inlines) {
+	numbered := isOrderedListParagraph(d, i)
+	if len(inlines) == 0 || isImagesOnlyInlines(inlines) || !hasInteractiveInlines(inlines, numbered) {
 		return false
 	}
 	th := a.markdownTheme(c)
@@ -313,11 +387,37 @@ func (a *App) renderHoverMarkdownBlock(c *ui.Context, d *parser.Document, i int,
 	} else {
 		el.FontSize(th.FontSize)
 	}
-	seq := 0
+	pb := inlineParaBuilder{
+		blockIdx: i,
+		numbered: numbered,
+		fallback: blockSpeechFallback(d, i, a.text),
+	}
 	el.Children(func() {
-		a.renderHoverInlines(c, inlines, 0, len(inlines), hoverInlineStyle{}, th, i, &seq, hf)
+		a.renderHoverInlines(c, inlines, 0, len(inlines), hoverInlineStyle{}, th, &pb, hf)
 	})
+	attachInlineSpeakers(el, pb.speakers)
 	return true
+}
+
+func attachInlineSpeakers(el ui.Element, speakers []drawnSpeaker) {
+	if len(speakers) == 0 {
+		return
+	}
+	el.DrawObjects(func(p *ui.Painter, at int, r ui.Rect) {
+		for _, sp := range speakers {
+			if sp.at == at {
+				pad := float32(2)
+				iconRect := ui.Rect{
+					X: r.X + pad,
+					Y: r.Y + pad/2,
+					W: max(1, r.W-2*pad),
+					H: max(1, r.H-pad),
+				}
+				p.Icon(sp.icon, iconRect, sp.color)
+				return
+			}
+		}
+	})
 }
 
 func isImagesOnlyInlines(inlines []parser.Inline) bool {
@@ -338,64 +438,77 @@ func isImagesOnlyInlines(inlines []parser.Inline) bool {
 	return hasImage
 }
 
-func hasHoverableWordInInlines(inlines []parser.Inline) bool {
-	return hasHoverableWordRange(inlines, 0, len(inlines), false)
+func hasInteractiveInlines(inlines []parser.Inline, numbered bool) bool {
+	return hasInteractiveRange(inlines, 0, len(inlines), false, numbered)
 }
 
-func hasHoverableWordRange(inlines []parser.Inline, from, to int, inLink bool) bool {
+func hasInteractiveRange(inlines []parser.Inline, from, to int, inLink, numbered bool) bool {
+	firstText := true
 	for k := from; k < to; k = inlines[k].Next {
 		n := &inlines[k]
 		switch n.Kind {
 		case parser.Text:
-			if !inLink && core.HasEnglishWord(n.Text) {
+			if !inLink && (core.HasEnglishWord(n.Text) || core.HasPhoneticOrExample(n.Text, numbered && firstText)) {
 				return true
 			}
+			firstText = false
 		case parser.Emphasis, parser.Strong, parser.Strikethrough:
-			if hasHoverableWordRange(inlines, k+1, n.Next, inLink) {
+			if hasInteractiveRange(inlines, k+1, n.Next, inLink, numbered && firstText) {
 				return true
 			}
+			firstText = false
+		case parser.LineBreak:
+			firstText = false
 		case parser.Link:
-			// Links keep their own interaction rather than word-hover previews.
+			firstText = false
 		}
 	}
 	return false
 }
 
-func (a *App) renderHoverInlines(c *ui.Context, inlines []parser.Inline, from, to int, style hoverInlineStyle, th *markdown.Theme, blockIdx int, seq *int, hf *hoverFrame) {
+func (a *App) renderHoverInlines(c *ui.Context, inlines []parser.Inline, from, to int, style hoverInlineStyle, th *markdown.Theme, pb *inlineParaBuilder, hf *hoverFrame) {
 	for k := from; k < to; k = inlines[k].Next {
 		n := &inlines[k]
 		switch n.Kind {
 		case parser.Text:
 			if style.inLink {
 				applyInlineStyle(ui.Text(c, n.Text), style, th)
+				pb.runes += utf8.RuneCountInString(n.Text)
+				pb.text.WriteString(n.Text)
 			} else {
-				a.renderHoverTextPieces(c, n.Text, style, th, blockIdx, seq, hf)
+				a.renderPhoneticText(c, n.Text, style, th, pb, hf)
 			}
 		case parser.SoftBreak:
 			applyInlineStyle(ui.Text(c, " "), style, th)
+			pb.runes++
+			pb.text.WriteByte(' ')
 		case parser.LineBreak:
 			applyInlineStyle(ui.Text(c, "\n"), style, th)
+			pb.runes++
+			pb.text.WriteByte('\n')
 		case parser.Emphasis:
 			next := style
 			next.italic = true
-			a.renderHoverInlines(c, inlines, k+1, n.Next, next, th, blockIdx, seq, hf)
+			a.renderHoverInlines(c, inlines, k+1, n.Next, next, th, pb, hf)
 		case parser.Strong:
 			next := style
 			next.bold = true
-			a.renderHoverInlines(c, inlines, k+1, n.Next, next, th, blockIdx, seq, hf)
+			a.renderHoverInlines(c, inlines, k+1, n.Next, next, th, pb, hf)
 		case parser.Strikethrough:
 			next := style
 			next.strike = true
-			a.renderHoverInlines(c, inlines, k+1, n.Next, next, th, blockIdx, seq, hf)
+			a.renderHoverInlines(c, inlines, k+1, n.Next, next, th, pb, hf)
 		case parser.Code:
 			el := ui.Text(c, n.Text).Font(th.CodeFont).FontSize(th.FontSize * th.CodeSize).Background(th.CodeBackground)
 			if !style.inLink {
 				el.TextColor(th.Code)
 			}
 			applyInlineStyle(el, style, th)
+			pb.runes += utf8.RuneCountInString(n.Text)
+			pb.text.WriteString(n.Text)
 		case parser.Link:
 			if style.inLink {
-				a.renderHoverInlines(c, inlines, k+1, n.Next, style, th, blockIdx, seq, hf)
+				a.renderHoverInlines(c, inlines, k+1, n.Next, style, th, pb, hf)
 				continue
 			}
 			dest := n.Dest
@@ -411,20 +524,30 @@ func (a *App) renderHoverInlines(c *ui.Context, inlines []parser.Inline, from, t
 			next := style
 			next.inLink = true
 			linkEl.Children(func() {
-				a.renderHoverInlines(c, inlines, k+1, n.Next, next, th, blockIdx, seq, hf)
+				a.renderHoverInlines(c, inlines, k+1, n.Next, next, th, pb, hf)
 			})
 		case parser.Image:
 			alt := parser.PlainText(inlines[k+1 : n.Next])
 			if alt == "" {
 				alt = "image"
 			}
-			ui.Text(c, "["+alt+"]").TextColor(th.Muted)
+			s := "[" + alt + "]"
+			ui.Text(c, s).TextColor(th.Muted)
+			pb.runes += utf8.RuneCountInString(s)
+			pb.text.WriteString(s)
 		case parser.Math:
 			ui.Text(c, n.Text).Font(th.CodeFont).FontSize(th.FontSize * th.CodeSize).TextColor(th.Muted)
+			pb.runes += utf8.RuneCountInString(n.Text)
+			pb.text.WriteString(n.Text)
 		case parser.FootnoteRef:
-			ui.Text(c, "["+n.Text+"]").FontSize(th.FontSize * 0.75).TextColor(th.Link)
+			s := "[" + n.Text + "]"
+			ui.Text(c, s).FontSize(th.FontSize * 0.75).TextColor(th.Link)
+			pb.runes += utf8.RuneCountInString(s)
+			pb.text.WriteString(s)
 		case parser.HTML, parser.Mention, parser.Reference:
 			applyInlineStyle(ui.Text(c, n.Text), style, th)
+			pb.runes += utf8.RuneCountInString(n.Text)
+			pb.text.WriteString(n.Text)
 		}
 	}
 }
@@ -442,7 +565,80 @@ func applyInlineStyle(el ui.Element, style hoverInlineStyle, th *markdown.Theme)
 	return el
 }
 
-func (a *App) renderHoverTextPieces(c *ui.Context, text string, style hoverInlineStyle, th *markdown.Theme, blockIdx int, seq *int, hf *hoverFrame) {
+func (a *App) renderPhoneticText(c *ui.Context, text string, style hoverInlineStyle, th *markdown.Theme, pb *inlineParaBuilder, hf *hoverFrame) {
+	numberedFirst := pb.numbered && pb.text.Len() == 0
+	segments := core.ParsePhoneticSegmentsWithContext(text, pb.text.String(), pb.fallback, numberedFirst)
+	for _, seg := range segments {
+		switch seg.Kind {
+		case core.PhoneticIPA:
+			applyInlineStyle(ui.Text(c, seg.Text), style, th)
+			pb.runes += utf8.RuneCountInString(seg.Text)
+			pb.text.WriteString(seg.Text)
+			a.renderInlineSpeaker(c, seg.SpeechText, th, pb)
+		case core.PhoneticExample:
+			a.renderHoverTextPieces(c, seg.Text, style, th, pb, hf)
+			a.renderInlineSpeaker(c, seg.SpeechText, th, pb)
+		default:
+			a.renderHoverTextPieces(c, seg.Text, style, th, pb, hf)
+		}
+	}
+}
+
+func (a *App) renderInlineSpeaker(c *ui.Context, speechText string, th *markdown.Theme, pb *inlineParaBuilder) {
+	if strings.TrimSpace(speechText) == "" {
+		return
+	}
+	t := c.Theme()
+	pb.seq++
+	key := fmt.Sprintf("spk%d:%d", pb.blockIdx, pb.seq)
+
+	// Add a thin visual space before the inline speaker icon.
+	ui.Text(c, " ")
+	pb.runes++
+
+	active := a.speaking && a.inlineSpeechKey == key
+	icon := icons["speak"]
+	label := a.tr("朗读") + " " + speechText
+	if active {
+		icon = icons["stop"]
+		label = a.tr("停止朗读")
+	}
+
+	size := max(float32(13), th.FontSize*0.92)
+	c.Key(key)
+	sp := ui.RichText(c, ui.Span{
+		Text:          "\uFFFC",
+		ObjectWidth:   size + 4,
+		ObjectHeight:  size * 0.85,
+		ObjectDescent: size * 0.15,
+		Radius:        4,
+	}).Cursor(ui.CursorPointer).Role(ui.RoleButton).Label(label).Tooltip(label)
+
+	hovered := sp.Hovered()
+	color := t.TextMuted
+	if active {
+		if t.Background.R < 128 {
+			color = ui.RGB(147, 197, 253)
+		} else {
+			color = ui.RGB(39, 110, 241)
+		}
+	} else if hovered {
+		color = t.Text
+		sp.Background(t.SurfaceHover)
+	}
+	if sp.Clicked() {
+		a.toggleInlineSpeech(key, speechText)
+	}
+
+	pb.speakers = append(pb.speakers, drawnSpeaker{
+		at:    pb.runes,
+		icon:  icon,
+		color: color,
+	})
+	pb.runes++
+}
+
+func (a *App) renderHoverTextPieces(c *ui.Context, text string, style hoverInlineStyle, th *markdown.Theme, pb *inlineParaBuilder, hf *hoverFrame) {
 	t := c.Theme()
 	dark := t.Background.R < 128
 	hoverBg := ui.RGBA(39, 110, 241, 0.09)
@@ -454,10 +650,12 @@ func (a *App) renderHoverTextPieces(c *ui.Context, text string, style hoverInlin
 	for _, piece := range core.SplitEnglishWords(text) {
 		if !piece.IsWord {
 			applyInlineStyle(ui.Text(c, piece.Text), style, th)
+			pb.runes += utf8.RuneCountInString(piece.Text)
+			pb.text.WriteString(piece.Text)
 			continue
 		}
-		*seq++
-		key := fmt.Sprintf("w%d:%d", blockIdx, *seq)
+		pb.seq++
+		key := fmt.Sprintf("w%d:%d", pb.blockIdx, pb.seq)
 		c.Key(key)
 		w := applyInlineStyle(ui.Text(c, piece.Text), style, th).Cursor(ui.CursorPointer)
 		hovered := w.Hovered()
@@ -477,6 +675,8 @@ func (a *App) renderHoverTextPieces(c *ui.Context, text string, style hoverInlin
 		if w.Clicked() {
 			hf.clickedWord = piece.Text
 		}
+		pb.runes += utf8.RuneCountInString(piece.Text)
+		pb.text.WriteString(piece.Text)
 	}
 }
 

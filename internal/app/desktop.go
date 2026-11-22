@@ -159,18 +159,38 @@ func (a *App) Menu() *mygo.Menu {
 
 func (a *App) newTrayMenu() *mygo.Menu {
 	items := []*mygo.MenuItem{
-		{Label: a.tr("打开翻译"), Click: func(*mygo.MenuItem, *mygo.Window) { a.Window.Show(); a.Window.Focus() }},
+		{Label: a.tr("打开翻译"), Click: func(*mygo.MenuItem, *mygo.Window) {
+			if a.Window != nil {
+				a.Window.Show()
+				a.Window.Focus()
+			}
+		}},
+		{ID: "hide", Label: a.tr("隐藏窗口"), Disabled: a.Window == nil, Click: func(*mygo.MenuItem, *mygo.Window) {
+			if a.Window != nil {
+				a.Window.Hide()
+			}
+		}},
 		{Label: a.tr("翻译剪贴板"), Click: func(*mygo.MenuItem, *mygo.Window) {
 			a.text = mygo.Clipboard.ReadText()
 			a.page = "translator"
-			a.Window.Show()
-			a.Window.Focus()
+			if a.Window != nil {
+				a.Window.Show()
+				a.Window.Focus()
+			}
 			a.start()
 		}},
 		{ID: "ocr", Label: a.tr("截图翻译"), Disabled: runtime.GOOS != "linux" && (a.busy || a.systemBusy),
 			Click: func(*mygo.MenuItem, *mygo.Window) { a.screenshot() }},
 		{ID: "pin", Label: a.tr("置顶"), Type: mygo.MenuItemCheckbox, Checked: a.pinned,
 			Click: func(*mygo.MenuItem, *mygo.Window) { a.togglePinned() }},
+		mygo.Separator(),
+		{ID: "settings", Label: a.tr("设置"), Click: func(*mygo.MenuItem, *mygo.Window) {
+			a.openSettings()
+			if a.Window != nil {
+				a.Window.Show()
+				a.Window.Focus()
+			}
+		}},
 	}
 	if label := a.updateLabel(); label != "" {
 		items = append(items, &mygo.MenuItem{ID: "update", Label: label, Disabled: a.updating, Click: func(*mygo.MenuItem, *mygo.Window) {
@@ -179,6 +199,17 @@ func (a *App) newTrayMenu() *mygo.Menu {
 				a.Window.Focus()
 			}
 			a.installLatest()
+		}})
+	} else if a.checkingUpdate {
+		items = append(items, &mygo.MenuItem{ID: "update", Label: a.tr("正在检查最新版本..."), Disabled: true})
+	} else {
+		items = append(items, &mygo.MenuItem{ID: "update", Label: a.tr("检查更新"), Click: func(*mygo.MenuItem, *mygo.Window) {
+			a.openSettings()
+			if a.Window != nil {
+				a.Window.Show()
+				a.Window.Focus()
+			}
+			a.checkForUpdatesManual()
 		}})
 	}
 	items = append(items, mygo.Separator(), &mygo.MenuItem{Role: mygo.RoleQuit})
@@ -340,19 +371,34 @@ func (a *App) saveSettings() {
 	}()
 }
 
+// Test hooks for selection capture and clipboard reading.
+var (
+	copySelectionFunc = desktop.CopySelection
+	readClipboardFunc = mygo.Clipboard.ReadText
+)
+
 func (a *App) selection() {
 	if a.systemBusy || a.busy {
 		return
 	}
 	a.previousWindow = desktop.ActiveWindow()
 	a.systemBusy = true
+	fallback := a.Data.Settings.AllowClipboardFallback
+	copySelection := copySelectionFunc
+	readClipboard := readClipboardFunc
 	go func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
-		err := desktop.CopySelection(ctx)
+		err := copySelection(ctx)
 		text := ""
 		if err == nil {
-			text = mygo.Clipboard.ReadText()
+			text = readClipboard()
+		}
+		if (err != nil || strings.TrimSpace(text) == "") && fallback {
+			if clip := readClipboard(); strings.TrimSpace(clip) != "" {
+				text = clip
+				err = nil
+			}
 		}
 		a.update(func() {
 			a.systemBusy = false
@@ -362,10 +408,20 @@ func (a *App) selection() {
 				a.failure = err.Error()
 				return
 			}
-			a.text = text
-			a.startLookup()
+			a.applySelectionText(text)
 		})
 	}()
+}
+
+func (a *App) applySelectionText(text string) {
+	a.text = text
+	if a.Data.Settings.DefaultAction == "Nop" {
+		if a.Window != nil {
+			a.showAtPointer()
+		}
+		return
+	}
+	a.startLookup()
 }
 
 func (a *App) insert() {
@@ -427,6 +483,7 @@ func (a *App) speakText(text, language string, options core.SpeechSettings) {
 			}
 			a.speaking = false
 			a.speechStatus = ""
+			a.inlineSpeechKey = ""
 			a.speechCancel = nil
 			if err != nil && !wasCanceled {
 				a.failure = "朗读失败: " + err.Error()
@@ -442,6 +499,7 @@ func (a *App) stopSpeaking() {
 	}
 	a.speaking = false
 	a.speechStatus = ""
+	a.inlineSpeechKey = ""
 	a.speechGeneration++
 }
 

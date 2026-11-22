@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"runtime"
+	"strings"
 	"sync"
 	"unicode/utf16"
 
@@ -56,4 +57,19 @@ func isWord(locale, text string) (bool, error) {
 	defer func() { api.close(iterator); runtime.KeepAlive(units); runtime.KeepAlive(localeBytes) }()
 	api.first(iterator)
 	return api.next(iterator) == int32(len(units)), nil
+}
+
+// IsWord reports whether text is a single word in language (or auto-detected
+// when language is "自动检测"), matching dictionary/word-mode detection.
+func IsWord(language, text string) bool {
+	trimmed := strings.TrimFunc(text, jsWhitespace)
+	if trimmed == "" {
+		return false
+	}
+	code := LanguageCode(language, trimmed)
+	if code == "" {
+		code = "en"
+	}
+	ok, err := isWord(code, trimmed)
+	return err == nil && ok
 }

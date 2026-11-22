@@ -249,3 +249,155 @@ func TestWordHoverCardEmptyErrorAndPlainText(t *testing.T) {
 		t.Fatalf("hover preview error should stay inside hover card, not set global failure: %q", a.failure)
 	}
 }
+
+func TestInlinePhoneticAndExampleSpeech(t *testing.T) {
+	origSpeech := inlineSpeechHook
+	t.Cleanup(func() { inlineSpeechHook = origSpeech })
+
+	type spokenCall struct {
+		text, lang string
+	}
+	var spoken []spokenCall
+	inlineSpeechHook = func(_ *App, text, lang string) {
+		spoken = append(spoken, spokenCall{text: text, lang: lang})
+	}
+
+	a := testApp(t)
+	a.Data.Settings.Source = "English"
+	a.Data.Settings.Target = "简体中文"
+	a.text = "hello"
+	a.resultWordMode = true
+	a.result = "hello\n[English]· /həˈloʊ/\n[interj.] 你好\n例句：\n1. How are you? (你好吗？)\n2. She said hi.（她打了招呼。）"
+
+	tt := ui.NewTester(a.View, 560, 760)
+
+	// Click IPA speaker button -> speaks "hello" in source language (word mode).
+	if err := tt.Click("朗读 hello"); err != nil {
+		t.Fatalf("IPA speaker button not found/clickable: %v", err)
+	}
+	if len(spoken) != 1 || spoken[0].text != "hello" || spoken[0].lang != "English" {
+		t.Fatalf("IPA spoken = %+v, want hello/English", spoken)
+	}
+	// Clicking the same active speaker button stops speaking.
+	tt.Frame()
+	if err := tt.Click("停止朗读"); err != nil {
+		t.Fatalf("active inline speaker did not switch to stop: %v", err)
+	}
+	if a.speaking || a.inlineSpeechKey != "" {
+		t.Fatalf("expected speech to stop, speaking=%v key=%q", a.speaking, a.inlineSpeechKey)
+	}
+
+	// Click numbered bilingual example speaker -> speaks only the English sentence, not its Chinese translation.
+	tt.Frame()
+	if err := tt.Click("朗读 How are you?"); err != nil {
+		t.Fatalf("example speaker button not found/clickable: %v", err)
+	}
+	if len(spoken) != 2 || spoken[1].text != "How are you?" {
+		t.Fatalf("example spoken = %+v, want 'How are you?'", spoken)
+	}
+	if err := tt.Click("朗读 She said hi."); err != nil {
+		t.Fatalf("second example speaker button not found/clickable: %v", err)
+	}
+	if len(spoken) != 3 || spoken[2].text != "She said hi." {
+		t.Fatalf("second example spoken = %+v, want 'She said hi.'", spoken)
+	}
+}
+
+func TestAutoCollectClipboardFallbackNopAndTrayShortcuts(t *testing.T) {
+	origCopy := copySelectionFunc
+	origClip := readClipboardFunc
+	t.Cleanup(func() {
+		copySelectionFunc = origCopy
+		readClipboardFunc = origClip
+	})
+
+	a := testApp(t)
+	streamer := &stubStreamer{reply: "ephemeral\n[English]· /ɪˈfɛm.ə.ɹəl/\n[adj.] 短暂的"}
+	a.Engine = streamer
+	a.Data.Settings.AutoCollect = true
+	a.Data.Settings.Source = "English"
+	a.Data.Settings.Target = "简体中文"
+
+	var mu sync.Mutex
+	done := make(chan struct{}, 16)
+	a.post = func(fn func()) {
+		mu.Lock()
+		fn()
+		mu.Unlock()
+		select {
+		case done <- struct{}{}:
+		default:
+		}
+	}
+
+	// Single word translation auto-collects into vocabulary.
+	a.text = "ephemeral"
+	a.start()
+	waitFor(t, done, func() bool {
+		mu.Lock()
+		defer mu.Unlock()
+		return !a.busy && len(a.Data.History) == 1
+	})
+	if len(a.Data.Vocabulary) != 1 || a.Data.Vocabulary[0].Text != "ephemeral" {
+		t.Fatalf("auto-collect vocabulary = %+v", a.Data.Vocabulary)
+	}
+
+	// Multi-word sentence should NOT auto-collect into vocabulary.
+	a.text = "This is a full sentence."
+	a.start()
+	waitFor(t, done, func() bool {
+		mu.Lock()
+		defer mu.Unlock()
+		return !a.busy && len(a.Data.History) == 2
+	})
+	if len(a.Data.Vocabulary) != 1 {
+		t.Fatalf("sentence should not auto-collect, vocabulary = %+v", a.Data.Vocabulary)
+	}
+
+	// DefaultAction = "Nop" + AllowClipboardFallback: fills text from clipboard on selection failure without starting LLM.
+	a.Data.Settings.AllowClipboardFallback = true
+	a.Data.Settings.DefaultAction = "Nop"
+	copySelectionFunc = func(context.Context) error { return errors.New("no selection") }
+	readClipboardFunc = func() string { return "clipboard phrase" }
+	a.selection()
+	waitFor(t, done, func() bool {
+		mu.Lock()
+		defer mu.Unlock()
+		return !a.systemBusy && a.text == "clipboard phrase"
+	})
+	if a.busy || a.failure != "" {
+		t.Fatalf("Nop + fallback unexpected state: busy=%v failure=%q", a.busy, a.failure)
+	}
+	streamer.mu.Lock()
+	queriesAfterNop := len(streamer.queries)
+	streamer.mu.Unlock()
+	if queriesAfterNop != 2 {
+		t.Fatalf("Nop default action should not trigger translation, queries = %d", queriesAfterNop)
+	}
+
+	// Tray menu includes settings, hide, and check-for-updates shortcuts.
+	menu := a.newTrayMenu()
+	if settingsItem := menu.ItemByID("settings"); settingsItem == nil || settingsItem.Label != "设置" {
+		t.Fatalf("tray settings item = %+v", settingsItem)
+	} else {
+		settingsItem.Click(settingsItem, nil)
+		if a.page != "settings" {
+			t.Fatalf("clicking tray settings did not open settings page: %q", a.page)
+		}
+	}
+	if hideItem := menu.ItemByID("hide"); hideItem == nil || hideItem.Label != "隐藏窗口" {
+		t.Fatalf("tray hide item = %+v", hideItem)
+	}
+	if updateItem := menu.ItemByID("update"); updateItem == nil || updateItem.Label != "检查更新" || updateItem.Disabled {
+		t.Fatalf("tray manual update check item = %+v", updateItem)
+	}
+
+	// Settings general page renders the new Nop option and checkboxes.
+	a.page = "settings"
+	a.settingsTab = 0
+	tt := ui.NewTester(a.View, 560, 880)
+	if !tt.HasText("自动加入收藏") || !tt.HasText("当无法获得选中文本时允许使用剪贴板来获取选中文本") {
+		t.Fatal("new general settings checkboxes missing")
+	}
+}
+
